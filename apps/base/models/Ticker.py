@@ -7,3 +7,7 @@ class Ticker(Control):
     closing_price = models.FloatField(default=None, null=True)
     leveraged_free_cash_flow = models.FloatField(default=None, null=True)
     outstanding_shares = models.IntegerField(default=None, null=True)
+    exchange = models.CharField(max_length=10, default=None, null=True)
+
+    def __str__(self):
+        return self.name
