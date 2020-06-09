@@ -3,9 +3,11 @@ from apps.base.models.Company import Company
 from apps.base.models.Ticker import Ticker
 
 # Register your models here.
-admin.site.register(Company)
-admin.site.register(Ticker)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'ticker_name', 'industry')
+admin.site.register(Company, CompanyAdmin)
 
 
-class ControlAdmin(admin.ModelAdmin):
-    pass
+class TickerAdmin(admin.ModelAdmin):
+    list_display = ('symbol', 'closing_price', 'market_cap', 'outstanding_shares', 'exchange')
+admin.site.register(Ticker, TickerAdmin)
