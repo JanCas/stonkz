@@ -9,8 +9,10 @@ django.setup()
 
 
 def populate_companies_and_stocks(Index='S&P500'):
-    pass
+    import yfinance as yf
 
+    companies = get_index_companies()
+    companies_tickers = yf.Tickers(companies)
 
 def get_index_companies(Index='S&P500'):
     import bs4 as bs
