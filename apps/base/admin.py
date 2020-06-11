@@ -4,12 +4,12 @@ from apps.base.models.Tickers import Tickers
 
 
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'ticker_name', 'industry')
-    actions = ['calculate_dcf']
+    list_display = ('name', 'ticker_name', 'industry', 'equity_valuation', 'calculated_share_price', 'pct_change')
+    actions = ['calculate_DCF']
 
-    def calculate_dcf(self, request, queryset):
+    def calculate_DCF(self, request, queryset):
         for x in queryset:
-            x.calculate_dcf
+            x.calculate_dcf()
 admin.site.register(Company, CompanyAdmin)
 
 
@@ -19,5 +19,5 @@ class TickerAdmin(admin.ModelAdmin):
 
     def update_closing_price(self, request, queryset):
         for x in queryset:
-            x.update_closing_price
+            x.update_closing_price()
 admin.site.register(Tickers, TickerAdmin)

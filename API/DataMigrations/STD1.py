@@ -31,12 +31,15 @@ def populate_companies_and_stocks(ticker_list=None):
         ticker_list = get_index_companies()
 
     for ticker in ticker_list:
-        print(ticker + '-----------------------------')
-        yahoo_object = Ticker(ticker)
-        ticker_object = create_ticker_object(yahoo_object=yahoo_object, ticker=ticker)
-        print('ticker created')
-        print('creating company')
-        create_company_object(yahoo_object=yahoo_object, ticker_object=ticker_object, ticker=ticker)
+        try:
+            print(ticker + '-----------------------------')
+            yahoo_object = Ticker(ticker)
+            ticker_object = create_ticker_object(yahoo_object=yahoo_object, ticker=ticker)
+            print('ticker created')
+            print('creating company')
+            create_company_object(yahoo_object=yahoo_object, ticker_object=ticker_object, ticker=ticker)
+        except:
+            print('Couldnt create company with ticker {}'.format(ticker))
         print()
 
 
@@ -73,4 +76,4 @@ def create_company_object(yahoo_object, ticker_object, ticker):
     print('Created company: ' + kwargs['name'])
 
 
-populate_companies_and_stocks(['AAPL', 'MSFT', 'GOOG'])
+populate_companies_and_stocks(['KO', 'AAPL', 'GOOG', 'TSLA', 'F'])
