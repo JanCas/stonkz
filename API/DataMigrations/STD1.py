@@ -48,6 +48,7 @@ def create_ticker_object(yahoo_object, ticker):
         'previous_closing_price': yahoo_object.summary_detail[ticker]['previousClose'],
         'market_cap': yahoo_object.summary_detail[ticker]['marketCap'],
         'free_cash_flow': yahoo_object.financial_data[ticker]['freeCashflow'],
+        'pe_ratio': yahoo_object.valuation_measures['PeRatio'].dropna()[-1],
         'net_income_to_common': yahoo_object.key_stats[ticker]['netIncomeToCommon'],
         'growth_rate': yahoo_object.earnings_trend[ticker]['trend'][4]['growth'],  # growth rate 5 years into the future
         'outstanding_shares': yahoo_object.key_stats[ticker]['sharesOutstanding'],
