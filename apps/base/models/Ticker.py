@@ -7,6 +7,7 @@ class Ticker(Control):
     previous_closing_price = models.FloatField(default=None, null=True)
     market_cap = models.FloatField(default=None, null=True)
     free_cash_flow = models.FloatField(default=None, null=True)
+    pe_ratio = models.FloatField(default=None, null=True)
     discount_rate = models.FloatField(default=.02, null=True)
     net_income_to_common = models.FloatField(default=None, null=True)
     growth_rate = models.FloatField(default=None, null=True)
