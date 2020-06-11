@@ -5,10 +5,11 @@ from apps.base.models.Ticker import Ticker
 
 class CompanyAdmin(admin.ModelAdmin):
     list_display = ('name', 'ticker_name', 'industry')
-    actions = ['calculate_DCF']
+    actions = ['calculate_dcf']
 
-    def calculate_DCF(self, request, queryset):
-        pass
+    def calculate_dcf(self, request, queryset):
+        for x in queryset:
+            x.calculate_dcf
 admin.site.register(Company, CompanyAdmin)
 
 

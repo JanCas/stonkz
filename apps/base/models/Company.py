@@ -19,8 +19,8 @@ class Company(Control):
         verbose_name = 'Company'
         verbose_name_plural = 'Companies'
 
-    def calculate_DCF(self):
-        print('calculating DCF for {}'.format(name))
+    def calculate_dcf(self):
+        print('calculating DCF for {}'.format(self.name))
         ticker = self.ticker_name
         sum = 0
         cash_flow = ticker.free_cash_flow
