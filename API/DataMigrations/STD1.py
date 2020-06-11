@@ -26,6 +26,7 @@ def get_index_companies():
 
 def populate_companies_and_stocks(ticker_list=None):
     from yahooquery import Ticker
+
     if ticker_list is None:
         ticker_list = get_index_companies()
 
@@ -40,7 +41,7 @@ def populate_companies_and_stocks(ticker_list=None):
 
 
 def create_ticker_object(yahoo_object, ticker):
-    from apps.base.models.Ticker import Ticker
+    from apps.base.models.Tickers import Tickers
 
     print('creating ticker with symbol: ' + ticker)
     kwargs = {
@@ -55,7 +56,7 @@ def create_ticker_object(yahoo_object, ticker):
         'exchange': yahoo_object.quote_type[ticker]['exchange'],
         'currency': yahoo_object.price[ticker]['currency']
     }
-    return Ticker.objects.get_or_create(**kwargs)[0]
+    return Tickers.objects.get_or_create(**kwargs)[0]
 
 
 def create_company_object(yahoo_object, ticker_object, ticker):

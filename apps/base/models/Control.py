@@ -11,7 +11,7 @@ class Control(models.Model):
                                    related_name="%(app_label)s_%(class)s_created",
                                    default=None,
                                    verbose_name='created_by')
-    created_at = models.DateTimeField(default=timezone.now(),
+    created_at = models.DateTimeField(default=timezone.now,
                                       editable=False,
                                       verbose_name='created_at')
     changed_by = models.ForeignKey(User,
@@ -21,6 +21,6 @@ class Control(models.Model):
                                    related_name="%(app_label)s_%(class)s_changed",
                                    default=None,
                                    verbose_name='changed_by')
-    changed_at = models.DateTimeField(default=timezone.now(),
+    changed_at = models.DateTimeField(default=timezone.now,
                                       editable=False,
                                       verbose_name='changed_at')
