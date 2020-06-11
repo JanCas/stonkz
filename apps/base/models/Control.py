@@ -24,6 +24,3 @@ class Control(models.Model):
     changed_at = models.DateTimeField(default=timezone.now(),
                                       editable=False,
                                       verbose_name='changed_at')
-    to_be_deleted = models.NullBooleanField(default=False,
-                                            null=True,
-                                            verbose_name='to be deleted')

@@ -9,5 +9,5 @@ admin.site.register(Company, CompanyAdmin)
 
 
 class TickerAdmin(admin.ModelAdmin):
-    list_display = ('symbol', 'closing_price', 'market_cap', 'outstanding_shares', 'exchange')
+    list_display = ('symbol', 'previous_closing_price', 'market_cap', 'outstanding_shares', 'exchange')
 admin.site.register(Ticker, TickerAdmin)
