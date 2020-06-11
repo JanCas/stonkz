@@ -1,3 +1,4 @@
+
 # FCF= cash flow
 # d = discount rate
 # n = number of years
@@ -15,6 +16,4 @@ def DCF(FCF, d, n, g, p, e):
     print(str(t) +'  ' +str (sum)+ '   '+ '   ' + str(FCF/((1+d))**(t))+ '    ')
 
 
-
-
-DCF(1.22, 0.02, 5, 0.14,28.03, 3.6)
+DCF(12.03, 0.02, 5, 0.0188,21.49, 8.92)

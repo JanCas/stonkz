@@ -1,3 +1,4 @@
 /apps/base/migrations/
 /apps/ai/migrations/
 db.sqlite3
+*.pyc
