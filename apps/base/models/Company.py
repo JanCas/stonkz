@@ -10,7 +10,10 @@ class Company(Control):
     ticker_name = models.ForeignKey(Tickers, on_delete=models.CASCADE, null=True, blank=True, verbose_name='ticker')
     beta = models.FloatField(default=0, null=True)
     industry = models.CharField(max_length=20, default=None, null=True)
+
     equity_valuation = models.FloatField(default=-1, null=True)
+    calculated_share_price = models.FloatField(default=-1, null=True)
+    pct_change = models.FloatField(default=None, null=True)
 
     def __str__(self):
         return self.name
@@ -30,4 +33,6 @@ class Company(Control):
         sum += (ticker.pe_ratio * ticker.net_income_to_common) / ((1+ticker.discount_rate) ** year)
 
         self.equity_valuation = sum
+        self.calculated_share_price = sum / ticker.outstanding_shares
+        self.pct_change = (self.calculated_share_price - ticker.previous_closing_price) / ticker.previous_closing_price * 100
         self.save()
