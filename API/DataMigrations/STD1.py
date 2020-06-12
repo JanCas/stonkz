@@ -76,4 +76,4 @@ def create_company_object(yahoo_object, ticker_object, ticker):
     print('Created company: ' + kwargs['name'])
 
 
-populate_companies_and_stocks(['KO', 'AAPL', 'GOOG', 'TSLA', 'F'])
+populate_companies_and_stocks(['KO', 'AAPL', 'GOOG', 'TSLA', 'MSFT'])
