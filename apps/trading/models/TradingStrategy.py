@@ -1,6 +1,10 @@
 from django.db import models
-
 from apps.base.models.Control import Control
+import talib
+from yahooquery import Ticker
+
+
+
 
 class TradingStrategy(Control):
     VOLUME = 0
@@ -18,3 +22,6 @@ class TradingStrategy(Control):
     class Meta:
         verbose_name_plural = 'Trading Strategies'
         verbose_name = 'Trading Strategy'
+
+    def MovingAverage():
+        pass
