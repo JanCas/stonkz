@@ -24,4 +24,4 @@ class TradingStrategy(Control):
         verbose_name = 'Trading Strategy'
 
     def MovingAverage(Ticker):
-        pass
+        
