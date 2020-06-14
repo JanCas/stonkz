@@ -18,3 +18,5 @@ class TradingStrategy(Control):
     class Meta:
         verbose_name_plural = 'Trading Strategies'
         verbose_name = 'Trading Strategy'
+
+    def MovingAverage():
