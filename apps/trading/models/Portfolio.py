@@ -20,3 +20,6 @@ class Portfolio(Control):
 
     value = models.FloatField(default=10000, help_text='value of the portfolio')
     cash = models.FloatField(default=10000)
+
+    def __str__(self):
+        return self.name

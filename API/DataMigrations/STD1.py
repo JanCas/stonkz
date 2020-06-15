@@ -47,7 +47,7 @@ def populate_companies_and_stocks(ticker_list=None):
 def create_ticker_object(yahoo_object, ticker):
     from apps.base.models.Tickers import Tickers
 
-    print('creating ticker with symbol: ' + ticker)
+    print('creating ticker with symbol: {}'.format(ticker))
     kwargs = {
         'symbol': ticker,
         'previous_closing_price': yahoo_object.summary_detail[ticker]['previousClose'],

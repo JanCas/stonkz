@@ -20,6 +20,9 @@ class TradingStrategy(Control):
         verbose_name_plural = 'Trading Strategies'
         verbose_name = 'Trading Strategy'
 
+    def __str__(self):
+        return self.strategy
+
     def MovingAverage(self, ticker, buy_volume):
         from yahooquery import Ticker
         import talib
@@ -38,7 +41,6 @@ class TradingStrategy(Control):
     #if the price goes from below the sma to above, buy
         if prices['close'][-2] < sma[-2] and prices['close'][-1] > sma[-1]:
             alpaca.submit_order(ticker, buy_volume, 'buy', 'market', 'day')
-
     #if the price goes from above the sma to below, short
         elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
             alpaca.submit_order(ticker, buy_volume, 'short', 'market', 'day')
