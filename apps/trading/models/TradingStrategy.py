@@ -28,13 +28,18 @@ class TradingStrategy(Control):
 
         alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
+    #retrieve ticker
         yahoo_ticker = Ticker(ticker)
+    #get prices from ticker
         prices = yahoo_ticker.history()
+    #calculate simple moving average
         sma = talib.SMA(prices['close'], timeperiod=20)
 
+    #if the price goes from below the sma to above, buy
         if prices['close'][-2] < sma[-2] and prices['close'][-1] > sma[-1]:
             alpaca.submit_order(ticker, buy_volume, 'buy', 'market', 'day')
 
+    #if the price goes from above the sma to below, short
         elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
             alpaca.submit_order(ticker, buy_volume, 'short', 'market', 'day')
 
