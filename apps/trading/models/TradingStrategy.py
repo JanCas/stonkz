@@ -1,7 +1,6 @@
 from django.db import models
 from apps.base.models.Control import Control
-import talib
-from yahooquery import Ticker
+
 
 
 class TradingStrategy(Control):
@@ -21,8 +20,26 @@ class TradingStrategy(Control):
         verbose_name_plural = 'Trading Strategies'
         verbose_name = 'Trading Strategy'
 
-    def MovingAverage():
-        pass
+    def MovingAverage(self, ticker, buy_volume):
+        from yahooquery import Ticker
+        import talib
+        import alpaca_trade_api as trade
+        from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+
+        alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
+
+        yahoo_ticker = Ticker(ticker)
+        prices = yahoo_ticker.history()
+        sma = talib.SMA(prices['close'], timeperiod=20)
+
+        if prices['close'][-2] < sma[-2] and prices['close'][-1] > sma[-1]:
+            alpaca.submit_order(ticker, buy_volume, 'buy', 'market', 'day')
+
+        elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
+            alpaca.submit_order(ticker, buy_volume, 'short', 'market', 'day')
+
+
+
 
     def ADOSC(self, ticker, stay_below_zero, buy_volume, threshold_diffrence=2):
         from yahooquery import Ticker
