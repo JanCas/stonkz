@@ -21,6 +21,7 @@ def get_index_companies():
         ticker = row.findAll('td')[0].text
         ticker = ticker.strip()
         tickers.append(ticker)
+        print(ticker)
     return tickers
 
 
@@ -76,4 +77,4 @@ def create_company_object(yahoo_object, ticker_object, ticker):
     print('Created company: ' + kwargs['name'])
 
 
-populate_companies_and_stocks(['KO', 'AAPL', 'GOOG', 'TSLA', 'MSFT'])
+populate_companies_and_stocks()
