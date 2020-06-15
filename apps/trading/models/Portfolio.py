@@ -18,6 +18,7 @@ class Portfolio(Control):
                                          verbose_name='Trading Strategy')
     holding_period = models.CharField(default = None, choices= HOLDING_STATUS, null=True)
 
+    positions = models.IntegerField(default=3, null=False, help_text='# of companies in portfolio')
     value = models.FloatField(default=10000, help_text='value of the portfolio')
     cash = models.FloatField(default=10000)
 

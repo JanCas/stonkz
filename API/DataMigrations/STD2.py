@@ -7,3 +7,5 @@ sys.path.append(BASE_PATH)
 os.environ['DJANGO_SETTING_MODULE'] = 'stonkz.settings'
 django.setup()
 
+def generate_portfolio():
+    pass
