@@ -2,16 +2,15 @@ from django.db import models
 from apps.base.models.Control import Control
 
 
-
 class TradingStrategy(Control):
-    ADOSC = 0
-    MOVING_AVERAGES = 1
+    ADOSC = 'ADOSC'
+    MOVING_AVERAGES = 'MOVING AVERAGES'
     TRADING_STRAT_CHOICES = [
         (ADOSC, 'ADOSC'),
         (MOVING_AVERAGES, 'Moving Averages')
     ]
 
-    strategy = models.CharField(max_length=10,
+    strategy = models.CharField(max_length=20,
                                 default=None,
                                 choices=TRADING_STRAT_CHOICES,
                                 null=False)
@@ -31,23 +30,21 @@ class TradingStrategy(Control):
 
         alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
-    #retrieve ticker
+        # retrieve ticker
         yahoo_ticker = Ticker(ticker)
-    #get prices from ticker
+        # get prices from ticker
         prices = yahoo_ticker.history()
-    #calculate simple moving average
+        # calculate simple moving average
         sma = talib.SMA(prices['close'], timeperiod=20)
 
-    #if the price goes from below the sma to above, buy
+        # if the price goes from below the sma to above, buy
         if prices['close'][-2] < sma[-2] and prices['close'][-1] > sma[-1]:
             alpaca.submit_order(ticker, buy_volume, 'buy', 'market', 'day')
-    #if the price goes from above the sma to below, short
+        # if the price goes from above the sma to below, short
         elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
             alpaca.submit_order(ticker, buy_volume, 'short', 'market', 'day')
 
-
-
-# Strategy based on Chaikin Oscillator, buy when change from negative to positive and difference greater than threshold difference
+    # Strategy based on Chaikin Oscillator, buy when change from negative to positive and difference greater than threshold difference
     def ADOSC(self, ticker, stay_below_zero, transaction_volume, threshold_difference=2, sell_threshold_difference=2):
         from yahooquery import Ticker
         import talib
@@ -67,12 +64,12 @@ class TradingStrategy(Control):
         if ticker_adosc_pct[-2] < 0 and \
                 abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_difference and \
                 ticker_adosc_pct[-1] > 0:
-                alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
+            alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
         # Sell
-        elif ticker_adosc_pct [-2] < 0 and \
-                abs(ticker_adosc_pct[-2]- ticker_adosc_pct [-1]) > sell_threshold_difference and \
-                ticker_adosc_pct [-1] < 0:
-                alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
+        elif ticker_adosc_pct[-2] < 0 and \
+                abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
+                ticker_adosc_pct[-1] < 0:
+            alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
         # Add other indicators to aid this oscillator, correlation between this and aroon, fall at the same time there is
         # actually a dip
-        #MFI, combined with chaikin shows good opportunity to buy
+        # MFI, combined with chaikin shows good opportunity to buy

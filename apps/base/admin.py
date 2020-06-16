@@ -4,7 +4,7 @@ from apps.base.models.Tickers import Tickers
 
 
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'ticker_name', 'industry', 'equity_valuation', 'calculated_share_price', 'pct_change')
+    list_display = ('name', 'ticker_name', 'industry', 'equity_valuation', 'calculated_share_price', 'pct_change', 'beta')
     actions = ['calculate_DCF']
 
     def calculate_DCF(self, request, queryset):

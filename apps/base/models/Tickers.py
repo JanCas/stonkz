@@ -9,7 +9,6 @@ from yahooquery import Ticker
 class Tickers(Control):
     symbol = models.CharField(max_length= 20, default=None, null=False)
     previous_closing_price = models.FloatField(default=None, null=True)
-    #previous_closing_date = models.DateField(default=(timezone.now - timedelta(1)), null=True)
     market_cap = models.FloatField(default=None, null=True)
     free_cash_flow = models.FloatField(default=None, null=True)
     pe_ratio = models.FloatField(default=None, null=True)
@@ -33,5 +32,4 @@ class Tickers(Control):
     def update_closing_price(self):
         ticker = Ticker(self.symbol)
         self.previous_closing_price = ticker.summary_detail[self.symbol]['previousClose']
-        #self.previous_closing_date = timezone.now - timedelta(1)
         self.save()
