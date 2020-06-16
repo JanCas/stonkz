@@ -3,14 +3,14 @@ from apps.base.models.Control import Control
 
 
 class TradingStrategy(Control):
-    ADOSC = 0
-    MOVING_AVERAGES = 1
+    ADOSC = 'ADOSC'
+    MOVING_AVERAGES = 'MOVING AVERAGES'
     TRADING_STRAT_CHOICES = [
         (ADOSC, 'ADOSC'),
         (MOVING_AVERAGES, 'Moving Averages')
     ]
 
-    strategy = models.CharField(max_length=10,
+    strategy = models.CharField(max_length=20,
                                 default=None,
                                 choices=TRADING_STRAT_CHOICES,
                                 null=False)

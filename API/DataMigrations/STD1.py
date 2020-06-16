@@ -5,7 +5,7 @@ import time
 
 BASE_PATH = os.path.dirname('../stonkz/')
 sys.path.append(BASE_PATH)
-os.environ['DJANGO_SETTING_MODULE'] = 'stonkz.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'stonkz.settings'
 django.setup()
 
 
@@ -40,7 +40,7 @@ def populate_companies_and_stocks(ticker_list=None):
             print('ticker created')
             print('creating company')
             create_company_object(yahoo_object=yahoo_object, ticker_object=ticker_object, ticker=ticker)
-            time.sleep(3)
+            time.sleep(5)
         except:
             print('Couldnt create company with ticker {}'.format(ticker))
         print()
