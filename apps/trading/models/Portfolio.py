@@ -13,10 +13,10 @@ class Portfolio(Control):
         (LONG_TERM_TRADING, 'long term trading')
     ]
 
-    name = models.CharField(default=None, null=True)
-    trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=False,
+    name = models.CharField(max_length=10, default=None, null=True)
+    trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
-    holding_period = models.CharField(default = None, choices= HOLDING_STATUS, null=True)
+    holding_period = models.CharField(max_length=10,default=None, choices= HOLDING_STATUS, null=True)
 
     positions = models.IntegerField(default=3, null=False, help_text='# of companies in portfolio')
     value = models.FloatField(default=10000, help_text='value of the portfolio')

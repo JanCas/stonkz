@@ -1,6 +1,7 @@
 import django
 import os
 import sys
+import time
 
 BASE_PATH = os.path.dirname('../stonkz/')
 sys.path.append(BASE_PATH)
@@ -39,6 +40,7 @@ def populate_companies_and_stocks(ticker_list=None):
             print('ticker created')
             print('creating company')
             create_company_object(yahoo_object=yahoo_object, ticker_object=ticker_object, ticker=ticker)
+            time.sleep(3)
         except:
             print('Couldnt create company with ticker {}'.format(ticker))
         print()
