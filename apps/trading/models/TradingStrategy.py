@@ -47,8 +47,8 @@ class TradingStrategy(Control):
 
 
 
-# Strategy based on Chaikin Oscilitor, buy when change from negative to positive and difference greater than threshold difference
-    def ADOSC(self, ticker, stay_below_zero, buy_volume, threshold_diffrence=2):
+# Strategy based on Chaikin Oscillator, buy when change from negative to positive and difference greater than threshold difference
+    def ADOSC(self, ticker, stay_below_zero, buy_volume, threshold_difference=2, sell_threshold_difference):
         from yahooquery import Ticker
         import talib
         import alpaca_trade_api as trade
@@ -61,8 +61,17 @@ class TradingStrategy(Control):
         ticker_adosc = talib.ADOSC(high=history['high'], low=history['low'], close=history['close'],
                                    volume=history['volume'])
         ticker_adosc_pct = ticker_adosc.pct_change()
-
+        # Buy based on [-2] - [-1] greater than threshold and [-1] > 0
+        # potentially try instead of having [-1] > 0 to buy, buy when difference between [-2] and [-1] is large enough
         if ticker_adosc_pct[-2] < 0 and \
-                abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_diffrence and \
+                abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_difference and \
                 ticker_adosc_pct[-1] > 0:
-            alpaca.submit_order(ticker, buy_volume, 'buy', 'market', 'day')
+                alpaca.submit_order(ticker, buy_volume, 'buy', 'market', 'day')
+        # Sell
+        if ticker_adosc_pct [-2] < 0 and \
+                abs(ticker_adosc_pct[-2]- ticker_adosc_pct [-1]) > sell_threshold_difference and \
+                ticker_adosc_pct [-1] < 0:
+                alpaca.submit_order(ticker, sell_volume, 'sell', 'market', 'day')
+        # Add other indicators to aid this oscillator, correlation between this and aroon, fall at the same time there is
+        # actually a dip
+        #MFI, combined with chaikin shows good opportunity to buy
