@@ -4,7 +4,7 @@ from apps.base.models.Tickers import Tickers
 from apps.trading.models.Portfolio import Portfolio
 
 
-class PortfolioItem(models.Model):
+class PortfolioItems(models.Model):
     # TRANSACTION_STATUS_CHOICES = []
 
     portfolio = models.ForeignKey(Portfolio, on_delete=models.SET_NULL, null=True, blank=False)

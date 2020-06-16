@@ -1,16 +1,22 @@
 from django.contrib import admin
 
-from apps.trading.models.Portfolio import Portfolio
-from apps.trading.models.PortfolioItems import PortfolioItem
-from apps.trading.models.TradingStrategy import TradingStrategy
+from .models.Portfolio import Portfolio
+from .models.PortfolioItems import PortfolioItems
+from .models.TradingStrategy import TradingStrategy
+
 
 # Register your models here.
 class PortfolioItemInline(admin.TabularInline):
-    model = PortfolioItem
+    model = PortfolioItems
 
 
 class PortfolioAdmin(admin.ModelAdmin):
     inlines = [PortfolioItemInline, ]
+    actions = ['run_trade', ]
+
+    def run_trade(self, request, queryset):
+        for x in queryset:
+            x.run()
 
 
 admin.site.register(Portfolio, PortfolioAdmin)

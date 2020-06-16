@@ -12,7 +12,7 @@ django.setup()
 def generate_portfolio(name, cash=10000, strategy='ADOSC', positions=3):
     import numpy as np
     from apps.base.models.Tickers import Tickers
-    from apps.trading.models.PortfolioItems import PortfolioItem
+    from apps.trading.models.PortfolioItems import PortfolioItems
 
     print('creating Portfolio')
     portfolio = create_portfolio(strategy=strategy, positions=positions, name=name, cash=cash)
@@ -28,7 +28,7 @@ def generate_portfolio(name, cash=10000, strategy='ADOSC', positions=3):
             'portfolio_allocation': 1 / positions,
             'ticker': ticker
         }
-        PortfolioItem.objects.get_or_create(**kwargs)
+        PortfolioItems.objects.get_or_create(**kwargs)
 
 
 def create_portfolio(strategy, positions, name, cash):
