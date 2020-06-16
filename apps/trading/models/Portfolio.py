@@ -13,7 +13,7 @@ class Portfolio(Control):
         (LONG_TERM_TRADING, 'long term trading')
     ]
 
-    name = models.CharField(default=None, null=False)
+    name = models.CharField(default=None, null=True)
     trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=False,
                                          verbose_name='Trading Strategy')
     holding_period = models.CharField(default = None, choices= HOLDING_STATUS, null=True)
