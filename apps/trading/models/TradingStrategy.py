@@ -47,8 +47,8 @@ class TradingStrategy(Control):
 
 
 
-# Strategy based on Chaikin Oscilitor, buy when change from negative to positive and difference greater than threshold difference
-    def ADOSC(self, ticker, stay_below_zero, buy_volume, threshold_diffrence=2):
+# Strategy based on Chaikin Oscillator, buy when change from negative to positive and difference greater than threshold difference
+    def ADOSC(self, ticker, stay_below_zero, buy_volume, threshold_difference=2, sell_threshold_difference):
         from yahooquery import Ticker
         import talib
         import alpaca_trade_api as trade
@@ -61,8 +61,14 @@ class TradingStrategy(Control):
         ticker_adosc = talib.ADOSC(high=history['high'], low=history['low'], close=history['close'],
                                    volume=history['volume'])
         ticker_adosc_pct = ticker_adosc.pct_change()
-
+# buy when slope goes from negative to positive by a threshold margin
         if ticker_adosc_pct[-2] < 0 and \
-                abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_diffrence and \
+                abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_difference and \
                 ticker_adosc_pct[-1] > 0:
             alpaca.submit_order(ticker, buy_volume, 'buy', 'market', 'day')
+# sell when slope goes from positive to negative by a threshold margin
+        if ticker_adosc_pct[-2] > 0 and \
+                    abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
+                    ticker_adosc_pct[-1] < 0:
+                alpaca.submit_order(ticker, sell_volume, 'sell', 'market', 'day')
+                # correlate it with IMF, seems dip at the same time sees price decrease.
