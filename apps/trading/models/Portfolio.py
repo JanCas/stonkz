@@ -28,3 +28,13 @@ class Portfolio(Control):
 
     def __str__(self):
         return self.name
+
+    def run(self):
+        from .PortfolioItems import PortfolioItems
+        for company in PortfolioItems.objects.filter(portfolio=self):
+            print('{} ---------------------------------'.format(company))
+            allocation_dollar  = self.cash * company.portfolio_allocation
+            transaction_volume = allocation_dollar / company.ticker.previous_closing_price
+            print(' allocation dollar: {} transaction volume: {}'.format(allocation_dollar, transaction_volume))
+            self.trading_strategy.ADOSC(ticker=company.ticker.symbol, transaction_volume=transaction_volume)
+            print()

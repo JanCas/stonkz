@@ -2,3 +2,4 @@
 /apps/ai/migrations/
 db.sqlite3
 *.pyc
+apps/trading/migrations/
