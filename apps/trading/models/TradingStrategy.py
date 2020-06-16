@@ -47,7 +47,7 @@ class TradingStrategy(Control):
 
 
 
-
+# Strategy based on Chaikin Oscilitor, buy when change from negative to positive and difference greater than threshold difference
     def ADOSC(self, ticker, stay_below_zero, buy_volume, threshold_diffrence=2):
         from yahooquery import Ticker
         import talib
