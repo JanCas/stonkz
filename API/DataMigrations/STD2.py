@@ -19,7 +19,7 @@ def generate_portfolio(name, cash=10000, strategy='ADOSC', positions=3):
     print('portfolio Created')
 
     tickers = np.array(list(Tickers.objects.all()))
-    ticker_indeces = random.sample(range(tickers.count()), positions)
+    ticker_indeces = random.sample(range(len(tickers)), positions)
 
     print('creating items')
     for ticker in tickers[ticker_indeces]:

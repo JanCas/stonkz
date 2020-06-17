@@ -70,7 +70,7 @@ class TradingStrategy(Control):
                                 choices=TRADING_STRAT_CHOICES,
                                 null=False)
 
-    method_name = models.CharField(max_length=20, default=None, null=False)
+    method_name = models.CharField(max_length=20, default='adosc', null=False)
 
     class Meta:
         verbose_name_plural = 'Trading Strategies'
