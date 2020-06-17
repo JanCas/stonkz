@@ -17,7 +17,7 @@ import talib
 def Backtest_MA(ticker):
     test_ticker = Ticker(ticker)
     prices = test_ticker.history()
-    sma = talib.SMA(prices['close'])
+    sma = talib.SMA(prices['close'], timeperiod=20)
 
     for x in range(3, prices['close'].size):
         if prices['close'][x-2] < sma[x-2] and prices['close'][x-1] > sma[x-1]:
