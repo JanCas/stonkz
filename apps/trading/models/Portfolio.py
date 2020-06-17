@@ -30,11 +30,20 @@ class Portfolio(Control):
         return self.name
 
     def run(self):
+        """
+        runs the appropriate trading strategy on that portfolio
+        :return:
+        """
+        import importlib
+        import math
         from .PortfolioItems import PortfolioItems
+
         for company in PortfolioItems.objects.filter(portfolio=self):
             print('{} ---------------------------------'.format(company))
             allocation_dollar  = self.cash * company.portfolio_allocation
-            transaction_volume = allocation_dollar / company.ticker.previous_closing_price
+            transaction_volume = math.floor(allocation_dollar / company.ticker.previous_closing_price)
             print(' allocation dollar: {} transaction volume: {}'.format(allocation_dollar, transaction_volume))
-            self.trading_strategy.ADOSC(ticker=company.ticker.symbol, transaction_volume=transaction_volume)
+            #get run method from TradingStrategy and run it
+            run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'), self.trading_strategy.method_name)
+            run_method(ticker=company.ticker.symbol, transaction_volume=transaction_volume, portfolio_item=company)
             print()
