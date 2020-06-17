@@ -10,17 +10,17 @@ class Backtesting(Control):
     start_date = models.DateField(default=date(date.today().year, 1, 1))
     end_date = models.DateField(default=date.today)
 
-def Backtest_MA(ticker):
-    from yahooquery import Ticker
-    import talib
 
+from yahooquery import Ticker
+import talib
+
+def Backtest_MA(ticker):
     test_ticker = Ticker(ticker)
     prices = test_ticker.history()
-    sma = talib.sma(prices['close'])
+    sma = talib.SMA(prices['close'])
 
-    for x in prices['close']:
-        # if the price goes from below the sma to above, buy
-        if prices['close'][x] < sma[x] and prices['close'][x+1] > sma[x+1]:
-            print("bought at " + prices['close'][x+3])
-        elif prices['close'][x] > sma[x] and prices['close'][x+1] < sma[x+1]
-            print("sold short at " + prices['close'][x+3])
+    for x in range(3, prices['close'].size):
+        if prices['close'][x-2] < sma[x-2] and prices['close'][x-1] > sma[x-1]:
+            print("bought at " + str(prices['close'][x]))
+        elif prices['close'][x-2] > sma[x-2] and prices['close'][x-1] < sma[x-1]:
+            print("sold short at " + str(prices['close'][x]))
