@@ -2,7 +2,7 @@ from django.db import models
 from apps.base.models.Control import Control
 
 # Strategy based on Chaikin Oscillator, buy when change from negative to positive and difference greater than threshold difference
-def adosc(ticker, transaction_volume, threshold_difference=2):
+def adosc(ticker, transaction_volume, portfolio_item, threshold_difference=2):
     from yahooquery import Ticker
     import talib
     import alpaca_trade_api as trade
@@ -22,12 +22,16 @@ def adosc(ticker, transaction_volume, threshold_difference=2):
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_difference and \
             ticker_adosc_pct[-1] > 0:
         print('Filing Buy Order with Adosc method')
+        portfolio_item.shares = transaction_volume
+        portfolio_item.save()
         alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
     # Sell
     elif ticker_adosc_pct[-2] < 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_difference and \
             ticker_adosc_pct[-1] < 0:
         print('Filing sell order with Adosc method')
+        portfolio_item.shares -= transaction_volume
+        portfolio_item.save()
         alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
     # Add other indicators to aid this oscillator, correlation between this and aroon, fall at the same time there is
     # actually a dip

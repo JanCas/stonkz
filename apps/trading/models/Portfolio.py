@@ -44,6 +44,6 @@ class Portfolio(Control):
             transaction_volume = math.floor(allocation_dollar / company.ticker.previous_closing_price)
             print(' allocation dollar: {} transaction volume: {}'.format(allocation_dollar, transaction_volume))
             #get run method from TradingStrategy and run it
-            run_method = getattr(importlib.import_module('models.TradingStrategy'), self.trading_strategy.method_name)
-            run_method(ticker=company.ticker.symbol, transaction_volume=transaction_volume)
+            run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'), self.trading_strategy.method_name)
+            run_method(ticker=company.ticker.symbol, transaction_volume=transaction_volume, portfolio_item=company)
             print()
