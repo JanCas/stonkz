@@ -1,7 +1,7 @@
 from django.db import models
 
 from apps.base.models.Tickers import Tickers
-from apps.trading.models.Portfolio import Portfolio
+from .Portfolio import Portfolio
 
 
 class PortfolioItems(models.Model):
