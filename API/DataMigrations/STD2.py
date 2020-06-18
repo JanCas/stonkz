@@ -26,7 +26,8 @@ def generate_portfolio(name, cash=10000, strategy='ADOSC', positions=3):
         kwargs = {
             'portfolio': portfolio,
             'portfolio_allocation': 1 / positions,
-            'ticker': ticker
+            'ticker': ticker,
+            'cash_allocated': cash / positions
         }
         PortfolioItems.objects.get_or_create(**kwargs)
 

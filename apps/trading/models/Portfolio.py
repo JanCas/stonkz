@@ -38,6 +38,7 @@ class Portfolio(Control):
         import math
         from .PortfolioItems import PortfolioItems
 
+        # TODO: add in valuation for the PortfolioItems
         for company in PortfolioItems.objects.filter(portfolio=self):
             print('{} ---------------------------------'.format(company))
             allocation_dollar  = self.cash * company.portfolio_allocation
@@ -47,3 +48,13 @@ class Portfolio(Control):
             run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'), self.trading_strategy.method_name)
             run_method(ticker=company.ticker.symbol, transaction_volume=transaction_volume, portfolio_item=company)
             print()
+
+    def set_name(self):
+        self.name = str(self.trading_strategy.strategy) + ' ' + str(self.positions) + ' positions'
+        self.save()
+
+#   def get_value(self):
+#        from .PortfolioItems import PortfolioItems
+#
+#        for stock in PortfolioItems.objects.filter(portfolio=self):
+#            if stock.shares != 0:
