@@ -12,11 +12,21 @@ class PortfolioItemInline(admin.TabularInline):
 
 class PortfolioAdmin(admin.ModelAdmin):
     inlines = [PortfolioItemInline, ]
-    actions = ['run_trade', ]
+    actions = ['run_trade',
+               'get_value',
+               'set_name']
 
-    def run_trade(self, request, queryset):
+    def run_trade(self, queryset):
         for x in queryset:
             x.run()
+
+    def get_value(self, queryset):
+        for x in queryset:
+            x.get_value()
+
+    def set_name(self, queryset):
+        for x in queryset:
+            x.set_name()
 
 
 admin.site.register(Portfolio, PortfolioAdmin)
