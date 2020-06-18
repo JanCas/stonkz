@@ -19,11 +19,11 @@ class Portfolio(Control):
     name = models.CharField(max_length=10, default=None, null=True)
     trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
-    holding_period = models.CharField(max_length=10, default=None, choices=HOLDING_STATUS_CHOICES, null=True,
-                                      blank=True)
+    holding_period = models.SmallIntegerField(default=None, choices=HOLDING_STATUS_CHOICES, null=True,
+                                              blank=True)
 
     positions = models.IntegerField(default=3, null=False, help_text='# of companies in portfolio')
-    value = models.FloatField(default=None, help_text='value of the portfolio')
+    value = models.FloatField(default=None, null=True, blank=True, help_text='value of the portfolio')
     starting_cash = models.FloatField(default=10000)
 
     def __str__(self):
