@@ -8,10 +8,12 @@ class PortfolioItems(models.Model):
     HOLD = 0
     SOLD = 1
     SHORT = 2
+    BUY_TO_COVER = 3
     TRANSACTION_STATUS_CHOICES = [
         (HOLD, 'Holding'),
-        (SOLD, 'sold'),
-        (SHORT, 'Shorting')
+        (SOLD, 'Sold'),
+        (SHORT, 'Shorting'),
+        (BUY_TO_COVER, 'Buy to Cover')
     ]
 
     portfolio = models.ForeignKey(Portfolio, on_delete=models.SET_NULL, null=True, blank=False)
@@ -28,8 +30,10 @@ class PortfolioItems(models.Model):
 
     def set_value(self):
         self.ticker.update_closing_price()
-        self.stock_value = self.shares * self.ticker.previous_closing_price
+        self.stock_value = abs(self.shares) * self.ticker.previous_closing_price
         self.total_value = self.stock_value + self.cash_allocated
+        if self.transaction_status is self.SHORT:
+            self.stock_value = None
         self.save()
         return self.total_value
 
@@ -47,4 +51,18 @@ class PortfolioItems(models.Model):
         self.shares -= transaction_volume
         self.transaction_status = self.SOLD
         self.stock_value = self.shares * self.ticker.previous_closing_price
+        self.save()
+
+    def short(self, transaction_volume):
+        self.ticker.update_closing_price()
+        self.transaction_status = self.SHORT
+        self.stock_value = None
+        self.shares -= transaction_volume
+        self.save()
+
+    def buy_to_cover(self, transaction_volume):
+        self.ticker.update_closing_price()
+        self.transaction_status = self.BUY_TO_COVER
+        self.shares += transaction_volume
+        self.stock_value = None
         self.save()

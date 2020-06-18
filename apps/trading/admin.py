@@ -16,15 +16,15 @@ class PortfolioAdmin(admin.ModelAdmin):
                'get_value',
                'set_name']
 
-    def run_trade(self, queryset):
+    def run_trade(self, request, queryset):
         for x in queryset:
             x.run()
 
-    def get_value(self, queryset):
+    def get_value(self, request, queryset):
         for x in queryset:
             x.get_value()
 
-    def set_name(self, queryset):
+    def set_name(self, request, queryset):
         for x in queryset:
             x.set_name()
 
