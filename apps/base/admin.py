@@ -16,6 +16,7 @@ admin.site.register(Company, CompanyAdmin)
 class TickerAdmin(admin.ModelAdmin):
     list_display = ('symbol', 'previous_closing_price', 'market_cap', 'outstanding_shares', 'exchange')
     actions = ['update_closing_price']
+    search_fields = ['symbol']
 
     def update_closing_price(self, request, queryset):
         for x in queryset:
