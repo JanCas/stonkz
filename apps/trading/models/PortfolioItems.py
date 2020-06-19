@@ -1,7 +1,7 @@
 from django.db import models
 
 from apps.base.models.Tickers import Tickers
-from apps.trading.models.Portfolio import Portfolio
+from .Portfolio import Portfolio
 
 
 class PortfolioItems(models.Model):
@@ -24,6 +24,9 @@ class PortfolioItems(models.Model):
     total_value = models.FloatField(default=None, blank=True, null=True)
     stock_value = models.FloatField(default=None, blank=True, null=True)
     cash_allocated = models.FloatField(default=None, blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = 'Portfolio Items'
 
     def __str__(self):
         return self.ticker.symbol

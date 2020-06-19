@@ -16,7 +16,7 @@ class Portfolio(Control):
 
     ]
 
-    name = models.CharField(max_length=10, default=None, null=True)
+    name = models.CharField(max_length=30, default=None, null=True)
     trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
     holding_period = models.SmallIntegerField(default=None, choices=HOLDING_STATUS_CHOICES, null=True,
@@ -51,7 +51,11 @@ class Portfolio(Control):
             print()
 
     def set_name(self):
-        self.name = str(self.trading_strategy.strategy) + ' ' + str(self.positions) + ' positions'
+        from .PortfolioItems import PortfolioItems
+        name = '|'
+        for item in PortfolioItems.objects.filter(portfolio=self):
+            name += ' ' + str(item)
+        self.name = str(self.trading_strategy.strategy) + name
         self.save()
 
     def get_value(self):
