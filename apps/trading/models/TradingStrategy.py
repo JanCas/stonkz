@@ -2,7 +2,30 @@ from django.db import models
 from apps.base.models.Control import Control
 
 
-def adosc(transaction_volume, portfolio_item, threshold_difference=2):
+class TradingStrategy(Control):
+    ADOSC = 'ADOSC'
+    MOVING_AVERAGES = 'MOVING AVERAGES'
+    TRADING_STRAT_CHOICES = [
+        (ADOSC, 'ADOSC'),
+        (MOVING_AVERAGES, 'Moving Averages')
+    ]
+
+    strategy = models.CharField(max_length=20,
+                                default=None,
+                                choices=TRADING_STRAT_CHOICES,
+                                null=False)
+
+    method_name = models.CharField(max_length=20, default='adosc', null=False)
+
+    class Meta:
+        verbose_name_plural = 'Trading Strategies'
+        verbose_name = 'Trading Strategy'
+
+    def __str__(self):
+        return self.strategy
+
+
+def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2):
     """
     strategy based on the chalkin oscilator
     :param transaction_volume:
@@ -25,14 +48,14 @@ def adosc(transaction_volume, portfolio_item, threshold_difference=2):
 
     # Buy when in the bottom of a dip in the chalking oscillator graph
     if ticker_adosc_pct[-2] < 0 and \
-            abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_difference and \
+            abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > buy_threshold_difference and \
             ticker_adosc_pct[-1] > 0:
         print('Filing Buy Order with Adosc method')
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
     # Sell at a tip in chalkin oscillator
     elif ticker_adosc_pct[-2] < 0 and \
-            abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > threshold_difference and \
+            abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
             ticker_adosc_pct[-1] < 0:
         print('Filing sell order with Adosc method')
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
@@ -64,25 +87,3 @@ def moving_average(ticker, transaction_volume):
     elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
         alpaca.submit_order(ticker, transaction_volume, 'short', 'market', 'day')
 
-
-class TradingStrategy(Control):
-    ADOSC = 'ADOSC'
-    MOVING_AVERAGES = 'MOVING AVERAGES'
-    TRADING_STRAT_CHOICES = [
-        (ADOSC, 'ADOSC'),
-        (MOVING_AVERAGES, 'Moving Averages')
-    ]
-
-    strategy = models.CharField(max_length=20,
-                                default=None,
-                                choices=TRADING_STRAT_CHOICES,
-                                null=False)
-
-    method_name = models.CharField(max_length=20, default='adosc', null=False)
-
-    class Meta:
-        verbose_name_plural = 'Trading Strategies'
-        verbose_name = 'Trading Strategy'
-
-    def __str__(self):
-        return self.strategy
