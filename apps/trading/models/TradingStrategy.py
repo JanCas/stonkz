@@ -65,7 +65,14 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     # MFI, combined with chaikin shows good opportunity to buy
 
 
-def moving_average(ticker, transaction_volume):
+def simple_moving_average(portfolio_item, transaction_volume, timeperiod=20):
+    """
+    trades based on the crossing of the simple moving average and the closing price
+    :param portfolio_item:
+    :param transaction_volume:
+    :param timeperiod:
+    :return:
+    """
     from yahooquery import Ticker
     import talib
     import alpaca_trade_api as trade
@@ -74,16 +81,16 @@ def moving_average(ticker, transaction_volume):
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
     # retrieve ticker
-    yahoo_ticker = Ticker(ticker)
+    yahoo_ticker = Ticker(str(portfolio_item))
     # get prices from ticker
     prices = yahoo_ticker.history()
     # calculate simple moving average
-    sma = talib.SMA(prices['close'], timeperiod=20)
+    sma = talib.SMA(prices['close'], timeperiod=timeperiod)
 
     # if the price goes from below the sma to above, buy
     if prices['close'][-2] < sma[-2] and prices['close'][-1] > sma[-1]:
-        alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
+        alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
     # if the price goes from above the sma to below, short
     elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
-        alpaca.submit_order(ticker, transaction_volume, 'short', 'market', 'day')
+        alpaca.submit_order(str(portfolio_item), transaction_volume, 'short', 'market', 'day')
 
