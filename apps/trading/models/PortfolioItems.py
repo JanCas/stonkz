@@ -25,6 +25,9 @@ class PortfolioItems(models.Model):
     stock_value = models.FloatField(default=None, blank=True, null=True)
     cash_allocated = models.FloatField(default=None, blank=True, null=True)
 
+    class Meta:
+        verbose_name_plural = 'Portfolio Items'
+
     def __str__(self):
         return self.ticker.symbol
 
