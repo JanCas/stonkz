@@ -1,8 +1,5 @@
 from django.db import models
 
-from apps.base.models.Tickers import Tickers
-from .Portfolio import Portfolio
-
 
 class PortfolioItems(models.Model):
     HOLD = 0
@@ -16,8 +13,8 @@ class PortfolioItems(models.Model):
         (BUY_TO_COVER, 'Buy to Cover')
     ]
 
-    portfolio = models.ForeignKey(Portfolio, on_delete=models.SET_NULL, null=True, blank=False)
-    ticker = models.ForeignKey(Tickers, on_delete=models.SET_NULL, null=True, blank=False)
+    portfolio = models.ForeignKey('trading.Portfolio', on_delete=models.SET_NULL, null=True, blank=False)
+    ticker = models.ForeignKey('base.Tickers', on_delete=models.SET_NULL, null=True, blank=False)
     shares = models.IntegerField(default=0, null=True, blank=False)
     portfolio_allocation = models.FloatField(default=None, null=True)
     transaction_status = models.SmallIntegerField(default=None, choices=TRANSACTION_STATUS_CHOICES, blank=True, null=True)

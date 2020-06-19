@@ -12,7 +12,7 @@ class TradingStrategyItem(models.Model):
     ]
 
     portfolio = models.ForeignKey('trading.Portfolio', on_delete=models.CASCADE, null=False)
-    parameter = models.CharField(max_length=20, default=None, null=False)
+    parameter = models.CharField(max_length=40, default=None, null=False)
     data_type = models.SmallIntegerField(default=0, choices=DATA_TYPE_CHOICES, null=True, blank=True)
     value = models.CharField(max_length=20, default=None, null=True)
 
