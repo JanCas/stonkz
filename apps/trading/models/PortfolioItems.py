@@ -13,7 +13,7 @@ class PortfolioItems(models.Model):
         (BUY_TO_COVER, 'Buy to Cover')
     ]
 
-    portfolio = models.ForeignKey('trading.Portfolio', on_delete=models.SET_NULL, null=True, blank=False)
+    portfolio = models.ForeignKey('trading.Portfolio', on_delete=models.CASCADE, null=False, blank=False)
     ticker = models.ForeignKey('base.Tickers', on_delete=models.SET_NULL, null=True, blank=False)
     shares = models.IntegerField(default=0, null=True, blank=False)
     portfolio_allocation = models.FloatField(default=None, null=True)
