@@ -12,8 +12,7 @@ class Portfolio(Control):
         (LONG_TERM_TRADING, 'long term trading')
     ]
 
-
-    name = models.CharField(max_length=30, default=None, null=True)
+    name = models.CharField(max_length=100, default=None, null=True)
     trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
     holding_period = models.SmallIntegerField(default=None, choices=HOLDING_STATUS_CHOICES, null=True,
@@ -37,7 +36,7 @@ class Portfolio(Control):
         from .PortfolioItems import PortfolioItems
         from .TradingStrategyItems import TradingStrategyItem
 
-        #configure the inputs for the trading algorithm
+        # configure the inputs for the trading algorithm
         kwargs = {}
         for input in TradingStrategyItem.objects.filter(portfolio=self):
             kwargs[input.parameter] = input.get_value()

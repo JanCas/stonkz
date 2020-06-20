@@ -16,6 +16,7 @@ class TradingStrategyItemInline(admin.TabularInline):
 class PortfolioAdmin(admin.ModelAdmin):
     inlines = [PortfolioItemInline,
                TradingStrategyItemInline]
+    list_display = ('name', 'value', 'pct_change', 'trading_strategy', 'positions')
     actions = ['run_trade',
                'get_value',
                'set_name']

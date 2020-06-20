@@ -50,16 +50,23 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     if ticker_adosc_pct[-2] < 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > buy_threshold_difference and \
             ticker_adosc_pct[-1] > 0:
-        print('Filing Buy Order with Adosc method')
+        if portfolio_item.transaction_status == 2: #only buy to cover if stock has been shorted before
+            print(' Filing buy to cover oder with adosc method')
+            alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
+        print(' Filing Buy Order with Adosc method')
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
     # Sell at a tip in chalkin oscillator
     elif ticker_adosc_pct[-2] < 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
             ticker_adosc_pct[-1] < 0:
-        print('Filing sell order with Adosc method')
+        if portfolio_item.transaction_status == 0: #making sure stock exists before selling it
+            print(' Filing sell order with Adosc method')
+            alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
+            portfolio_item.sell(transaction_volume=transaction_volume)
+        print(' Filing short order with Adosc method')
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
-        portfolio_item.sell(transaction_volume=transaction_volume)
+        portfolio_item.short(transaction_volume=transaction_volume)
     # Add other indicators to aid this oscillator, correlation between this and aroon, fall at the same time there is
     # actually a dip
     # MFI, combined with chaikin shows good opportunity to buy
@@ -80,11 +87,8 @@ def simple_moving_average(portfolio_item, transaction_volume, timeperiod=20):
 
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
-    # retrieve ticker
     yahoo_ticker = Ticker(str(portfolio_item))
-    # get prices from ticker
     prices = yahoo_ticker.history()
-    # calculate simple moving average
     sma = talib.SMA(prices['close'], timeperiod=timeperiod)
 
     # if the price goes from below the sma to above, buy
@@ -93,4 +97,3 @@ def simple_moving_average(portfolio_item, transaction_volume, timeperiod=20):
     # if the price goes from above the sma to below, short
     elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'short', 'market', 'day')
-
