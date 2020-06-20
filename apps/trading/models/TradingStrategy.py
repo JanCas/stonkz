@@ -36,6 +36,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     from yahooquery import Ticker
     import talib
     import alpaca_trade_api as trade
+    from .TradeHistoryItem import log_trade
     from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
     from API.Help import pct_change
 
@@ -54,9 +55,11 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
         if portfolio_item.transaction_status == 2: #only buy to cover if stock has been shorted before
             print(' Filing buy to cover oder with adosc method')
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
+            log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=2)
         print(' Filing Buy Order with Adosc method')
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
+        log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
     # Sell at a tip in chalkin oscillator
     elif ticker_adosc_pct[-2] > 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
@@ -65,9 +68,11 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
             print(' Filing sell order with Adosc method')
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
             portfolio_item.sell(transaction_volume=transaction_volume)
+            log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=1)
         print(' Filing short order with Adosc method')
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
         portfolio_item.short(transaction_volume=transaction_volume)
+        log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
     # Add other indicators to aid this oscillator, correlation between this and aroon, fall at the same time there is
     # actually a dip
     # MFI, combined with chaikin shows good opportunity to buy

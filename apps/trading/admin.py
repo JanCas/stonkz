@@ -4,18 +4,26 @@ from .models.Portfolio import Portfolio
 from .models.PortfolioItems import PortfolioItems
 from .models.TradingStrategy import TradingStrategy
 from .models.TradingStrategyItems import TradingStrategyItem
+from .models.TradeHistoryItem import TradeHistoryItem
+
 
 # Register your models here.
 class PortfolioItemInline(admin.TabularInline):
     model = PortfolioItems
 
+
 class TradingStrategyItemInline(admin.TabularInline):
     model = TradingStrategyItem
 
 
+class TradeHistoryItemInline(admin.TabularInline):
+    model = TradeHistoryItem
+
+
 class PortfolioAdmin(admin.ModelAdmin):
     inlines = [PortfolioItemInline,
-               TradingStrategyItemInline]
+               TradingStrategyItemInline,
+               TradeHistoryItemInline]
     list_display = ('name', 'value', 'pct_change', 'trading_strategy', 'positions')
     actions = ['run_trade',
                'get_value',
