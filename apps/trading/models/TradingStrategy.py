@@ -37,6 +37,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     import talib
     import alpaca_trade_api as trade
     from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+    from API.Help import pct_change
 
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
@@ -44,7 +45,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     history = yahoo_ticker.history()
     ticker_adosc = talib.ADOSC(high=history['high'], low=history['low'], close=history['close'],
                                volume=history['volume'])
-    ticker_adosc_pct = ticker_adosc.pct_change()
+    ticker_adosc_pct = pct_change(ticker_adosc)
 
     # Buy when in the bottom of a dip in the chalking oscillator graph
     if ticker_adosc_pct[-2] < 0 and \
@@ -57,7 +58,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
     # Sell at a tip in chalkin oscillator
-    elif ticker_adosc_pct[-2] < 0 and \
+    elif ticker_adosc_pct[-2] > 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
             ticker_adosc_pct[-1] < 0:
         if portfolio_item.transaction_status == 0: #making sure stock exists before selling it
