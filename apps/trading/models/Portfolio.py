@@ -21,7 +21,7 @@ class Portfolio(Control):
     name = models.CharField(max_length=100, default=None, null=True)
     trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
-    trading_frequency = models.IntegerField(default=FIFTEEN_MINUTES, null=True, blank=True)
+    trading_frequency = models.IntegerField(default=FIFTEEN_MINUTES, choices=TRADING_Frequency_CHOICES, null=True, blank=True)
 
     positions = models.IntegerField(default=3, null=False, help_text='# of companies in portfolio')
     value = models.FloatField(default=None, null=True, blank=True, help_text='value of the portfolio')
