@@ -25,7 +25,7 @@ class TradingStrategy(Control):
         return self.strategy
 
 
-def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2):
+def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d'):
     """
     strategy based on the chalkin oscilator
     :param transaction_volume:
@@ -41,9 +41,9 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     from API.Help import pct_change
 
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
-
-    yahoo_ticker = Ticker(str(portfolio_item))
-    history = yahoo_ticker.history()
+    ticker = str(portfolio_item)
+    yahoo_ticker = Ticker(ticker)
+    history = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
     ticker_adosc = talib.ADOSC(high=history['high'], low=history['low'], close=history['close'],
                                volume=history['volume'])
     ticker_adosc_pct = pct_change(ticker_adosc)
@@ -52,25 +52,25 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     if ticker_adosc_pct[-2] < 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > buy_threshold_difference and \
             ticker_adosc_pct[-1] > 0:
-        if portfolio_item.transaction_status == 2: #only buy to cover if stock has been shorted before
-            print(' Filing buy to cover oder with adosc method')
-            alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
+        if portfolio_item.transaction_status == 2:  # only buy to cover if stock has been shorted before
+            print('buying to cover {} shares of {}'.format(transaction_volume, ticker))
+            alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=2)
-        print(' Filing Buy Order with Adosc method')
-        alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
+        print('buying {} shares of {}'.format(transaction_volume, ticker))
+        alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
         log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
     # Sell at a tip in chaikin oscillator
     elif ticker_adosc_pct[-2] > 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
             ticker_adosc_pct[-1] < 0:
-        if portfolio_item.transaction_status == 0: #making sure stock exists before selling it
-            print(' Filing sell order with Adosc method')
-            alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
+        if portfolio_item.transaction_status == 0:  # making sure stock exists before selling it
+            print('selling {} shares of {}'.format(transaction_volume, ticker))
+            alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
             portfolio_item.sell(transaction_volume=transaction_volume)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=1)
-        print(' Filing short order with Adosc method')
-        alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
+        print('shorting {} shares of {}'.format(transaction_volume, ticker))
+        alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
         portfolio_item.short(transaction_volume=transaction_volume)
         log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
     # Add other indicators to aid this oscillator, correlation between this and aroon, fall at the same time there is
