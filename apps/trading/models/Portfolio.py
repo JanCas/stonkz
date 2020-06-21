@@ -46,12 +46,13 @@ class Portfolio(Control):
         for input in TradingStrategyItem.objects.filter(portfolio=self):
             kwargs[input.parameter] = input.get_value()
 
+        #run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
-            company.ticker.update_closing_price()
-            transaction_volume = math.floor(company.cash_allocated / company.ticker.previous_closing_price)
+            company.ticker.update_price()
+            transaction_volume = math.floor(company.cash_allocated / company.ticker.price_now)
             kwargs['transaction_volume'] = transaction_volume
             kwargs['portfolio_item'] = company
-            # get run method from TradingStrategy and run it
+            # get run from TradingStrategy and run it
             run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'),
                                  self.trading_strategy.method_name)
             run_method(**kwargs)

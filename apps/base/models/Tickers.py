@@ -3,12 +3,11 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 
-from yahooquery import Ticker
-
 
 class Tickers(Control):
     symbol = models.CharField(max_length= 20, default=None, null=False)
     previous_closing_price = models.FloatField(default=None, null=True)
+    price_now = models.FloatField(default=None, null=True)
     market_cap = models.FloatField(default=None, null=True)
     free_cash_flow = models.FloatField(default=None, null=True)
     pe_ratio = models.FloatField(default=None, null=True)
@@ -31,6 +30,12 @@ class Tickers(Control):
         return self.symbol
 
     def update_closing_price(self):
+        from yahooquery import Ticker
+
         ticker = Ticker(self.symbol)
         self.previous_closing_price = ticker.summary_detail[self.symbol]['previousClose']
         self.save()
+
+    def update_price(self):
+        from yahooquery import Ticker
+        # TODO: Finish this method
