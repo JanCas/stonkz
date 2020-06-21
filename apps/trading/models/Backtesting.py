@@ -16,11 +16,15 @@ import talib
 
 def Backtest_MA(ticker):
     test_ticker = Ticker(ticker)
-    prices = test_ticker.history()
-    sma = talib.SMA(prices['close'], timeperiod=20)
+    closing_prices = test_ticker.history()
+    live_prices = test_ticker.history(interval='1h')
+    sma = talib.SMA(closing_prices['close'], timeperiod=140)
 
-    for x in range(3, prices['close'].size):
-        if prices['close'][x-2] < sma[x-2] and prices['close'][x-1] > sma[x-1]:
-            print("bought at " + str(prices['close'][x]))
-        elif prices['close'][x-2] > sma[x-2] and prices['close'][x-1] < sma[x-1]:
-            print("sold short at " + str(prices['close'][x]))
+    for x in range(75, live_prices['close'].size):
+        y = 20
+        if x % 7 == 0:
+            y += 1
+        if live_prices['close'][x-2] < sma[y] and live_prices['close'][x-1] > sma[y]:
+            print("bought at " + str(live_prices['close'][x]))
+        elif live_prices['close'][x-2] > sma[y] and live_prices['close'][x-1] < sma[y]:
+            print("sold short at " + str(live_prices['close'][x]))
