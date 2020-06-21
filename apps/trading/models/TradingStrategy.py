@@ -25,12 +25,16 @@ class TradingStrategy(Control):
         return self.strategy
 
 
-def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d'):
+def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d', fasperiod=3, slowperiod=10):
     """
-    strategy based on the chalkin oscilator
+    strategy that trades based on reversals in the chaikin oscillator
     :param transaction_volume:
     :param portfolio_item:
-    :param threshold_difference:
+    :param buy_threshold_difference:
+    :param sell_threshold_difference:
+    :param period:
+    :param fasperiod:
+    :param slowperiod:
     :return:
     """
     from yahooquery import Ticker
@@ -45,7 +49,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     yahoo_ticker = Ticker(ticker)
     history = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
     ticker_adosc = talib.ADOSC(high=history['high'], low=history['low'], close=history['close'],
-                               volume=history['volume'])
+                               volume=history['volume'], fasperiod=fasperiod, slowperiod=slowperiod)
     ticker_adosc_pct = pct_change(ticker_adosc)
 
     # Buy when in the bottom of a dip in the chalking oscillator graph
@@ -60,6 +64,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
         alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
         log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
+
     # Sell at a tip in chaikin oscillator
     elif ticker_adosc_pct[-2] > 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \

@@ -24,6 +24,8 @@ def run(name=None):
             portfolio.run()
             portfolio.get_value()
         else:
+            print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(
+                timezone.localtime(timezone.now())))
             trigger_run(name=name)
         scheduler.enter(portfolio.trading_frequency, priority=1, action=run_recursive)
 
@@ -42,6 +44,8 @@ def trigger_run(name=None):
         if not is_trading_hours(timezone.localtime(timezone.now())):
             print('Its not trading hours {}'.format(timezone.localtime(timezone.now())))
         else:
+            print('-----------------------THE MARKET HAS OPENED AT {}----------------------------'.format(
+                timezone.localtime(timezone.now())))
             run(name)
         scheduler.enter(60, priority=1, action=trigger_run_recursive)
 

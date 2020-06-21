@@ -2,12 +2,12 @@ from django.db import models
 
 
 class PortfolioItems(models.Model):
-    HOLD = 0
+    BUY = 0
     SOLD = 1
     SHORT = 2
     BUY_TO_COVER = 3
     TRANSACTION_STATUS_CHOICES = [
-        (HOLD, 'Holding'),
+        (BUY, 'Buy'),
         (SOLD, 'Sold'),
         (SHORT, 'Shorting'),
         (BUY_TO_COVER, 'Buy to Cover')
@@ -29,8 +29,8 @@ class PortfolioItems(models.Model):
         return self.ticker.symbol
 
     def set_value(self):
-        self.ticker.update_closing_price()
-        self.stock_value = abs(self.shares) * self.ticker.previous_closing_price
+        self.ticker.update_price()
+        self.stock_value = abs(self.shares) * self.ticker.price_now
         self.total_value = self.stock_value + self.cash_allocated
         if self.transaction_status is self.SHORT:
             self.stock_value = None
@@ -38,23 +38,23 @@ class PortfolioItems(models.Model):
         return self.total_value
 
     def buy(self, transaction_volume):
-        self.ticker.update_closing_price()
+        self.ticker.update_price()
         self.shares += transaction_volume
         self.transaction_status = self.HOLD
-        self.stock_value = self.shares * self.ticker.previous_closing_price
+        self.stock_value = self.shares * self.ticker.price_now
         self.cash_allocated -= self.stock_value
         self.save()
 
     def sell(self, transaction_volume):
-        self.ticker.update_closing_price()
-        self.cash_allocated += transaction_volume * self.ticker.previous_closing_price
+        self.ticker.update_price()
+        self.cash_allocated += transaction_volume * self.ticker.price_now
         self.shares -= transaction_volume
         self.transaction_status = self.SOLD
-        self.stock_value = self.shares * self.ticker.previous_closing_price
+        self.stock_value = self.shares * self.ticker.price_now
         self.save()
 
     def short(self, transaction_volume):
-        self.ticker.update_closing_price()
+        self.ticker.update_price()
         self.transaction_status = self.SHORT
         self.stock_value = None
         self.shares -= transaction_volume
