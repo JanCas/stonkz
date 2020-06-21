@@ -22,9 +22,9 @@ def run(name=None):
         # portfolio.get_value()
         # TODO: REMOVE ONCE TESTED
         print('trading hours')
-        scheduler.enterabs(delay=portfolio.trading_frequency, priority=1, action=run_recursive)
+        scheduler.enter(portfolio.trading_frequency, priority=1, action=run_recursive)
 
-    scheduler.enterabs(delay=portfolio.trading_frequency, priority=1, action=run_recursive)
+    scheduler.enter(portfolio.trading_frequency, priority=1, action=run_recursive)
     scheduler.run()
 
 
@@ -40,14 +40,17 @@ def trigger_run(name=None):
     def trigger_run_recursive():
         if timezone.now().isoweekday() in [6, 7]:
             print('Its the weekend')
-        elif not is_trading_hours(time=timezone.now()):
+        elif not is_trading_hours(time=timezone.localtime(timezone.now())):
             print('Its not trading hours')
         else:
-            run()
-        scheduler.enterabs(delay=60, priority=1, action=trigger_run_recursive)
+            run(name)
+        scheduler.enter(60, priority=1, action=trigger_run_recursive)
 
-    scheduler.enterabs(delay=60, priority=1, action=trigger_run_recursive)
+    scheduler.enter(60, priority=1, action=trigger_run_recursive)
     scheduler.run(name)
 
+
 def is_trading_hours(time):
-    pass
+    return (time.hour > 9 and time.minute > 30) and (time.hour < 16)
+
+trigger_run()
