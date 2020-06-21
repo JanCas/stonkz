@@ -5,18 +5,23 @@ from apps.trading.models.TradingStrategy import TradingStrategy
 
 
 class Portfolio(Control):
-    SHORT_TERM_TRADING = 0
-    LONG_TERM_TRADING = 1
-    HOLDING_STATUS_CHOICES = [
-        (SHORT_TERM_TRADING, 'short term trading'),
-        (LONG_TERM_TRADING, 'long term trading')
+    ONE_MINUTE = 60
+    FIVE_MINUTES = 300
+    FIFTEEN_MINUTES = 900
+    THIRTY_MINUTES = 1800
+    ONE_HOUR = 3600
+    TRADING_Frequency_CHOICES = [
+        (ONE_MINUTE, '1min'),
+        (FIVE_MINUTES, '5min'),
+        (FIFTEEN_MINUTES, '15min'),
+        (THIRTY_MINUTES, '30min'),
+        (ONE_HOUR, '1hr')
     ]
 
     name = models.CharField(max_length=100, default=None, null=True)
     trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
-    holding_period = models.SmallIntegerField(default=None, choices=HOLDING_STATUS_CHOICES, null=True,
-                                              blank=True)
+    trading_frequency = models.IntegerField(default=FIFTEEN_MINUTES, null=True, blank=True)
 
     positions = models.IntegerField(default=3, null=False, help_text='# of companies in portfolio')
     value = models.FloatField(default=None, null=True, blank=True, help_text='value of the portfolio')
