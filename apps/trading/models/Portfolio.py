@@ -48,10 +48,7 @@ class Portfolio(Control):
 
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_closing_price()
-
-            print('{} ---------------------------------'.format(company))
             transaction_volume = math.floor(company.cash_allocated / company.ticker.previous_closing_price)
-            print(' allocation dollar: {} transaction volume: {}'.format(company.cash_allocated, transaction_volume))
             kwargs['transaction_volume'] = transaction_volume
             kwargs['portfolio_item'] = company
             # get run method from TradingStrategy and run it
@@ -77,3 +74,13 @@ class Portfolio(Control):
 
         self.pct_change = (self.value - self.starting_cash) / self.starting_cash * 100.0
         self.save()
+
+    def get_trading_frequency(self):
+        if self.trading_frequency == self.ONE_MINUTE:
+            return '1m'
+        elif self.trading_frequency == self.FIFTEEN_MINUTES:
+            return '15m'
+        elif self.trading_frequency == self.THIRTY_MINUTES:
+            return '30m'
+        elif self.trading_frequency == self.ONE_HOUR:
+            return '60m'
