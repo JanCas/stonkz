@@ -25,6 +25,7 @@ class Tickers(Control):
     class Meta:
         verbose_name_plural = 'Tickers'
         verbose_name = 'Ticker'
+        ordering = ['symbol']
 
     def __str__(self):
         return self.symbol

@@ -60,7 +60,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
         log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
-    # Sell at a tip in chalkin oscillator
+    # Sell at a tip in chaikin oscillator
     elif ticker_adosc_pct[-2] > 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
             ticker_adosc_pct[-1] < 0:
