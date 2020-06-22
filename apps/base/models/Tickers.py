@@ -38,4 +38,7 @@ class Tickers(Control):
 
     def update_price(self):
         from yahooquery import Ticker
-        # TODO: Finish this method
+
+        ticker = Ticker(self.symbol)
+        self.price_now = ticker.financial_data[self.symbol]['currentPrice']
+        self.save()
