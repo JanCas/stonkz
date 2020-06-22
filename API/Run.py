@@ -21,8 +21,8 @@ def run(name=None):
     def run_recursive():
         if is_trading_hours(timezone.localtime(timezone.now())):
             print('{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now())))
-            #portfolio.run()
-            #portfolio.get_value()
+            portfolio.run()
+            portfolio.get_value()
             print('market is open {}'.format(timezone.localtime(timezone.now())))
         else:
             print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(
@@ -50,13 +50,17 @@ def trigger_run(name=None):
             run(name)
         scheduler.enter(60, priority=1, action=trigger_run_recursive)
 
-    scheduler.enter(30, priority=1, action=trigger_run_recursive)
+    scheduler.enter(0, priority=1, action=trigger_run_recursive)
     scheduler.run(name)
 
 
-def is_trading_hours(time):
-    return (time.hour > 9 and time.minute > 30) and (time.hour < 16) and \
-           (time.isoweekday() not in [6, 7])
+def is_trading_hours(time_input):
+    from datetime import time
+
+    start_time = time(9,30,0)
+    end_time = time(16,0,0)
+    return time_input.time() > start_time and time_input.time() < end_time and \
+           (time_input.isoweekday() not in [6, 7])
 
 
 trigger_run()

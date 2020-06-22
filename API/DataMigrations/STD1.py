@@ -53,6 +53,7 @@ def create_ticker_object(yahoo_object, ticker):
     kwargs = {
         'symbol': ticker,
         'previous_closing_price': yahoo_object.summary_detail[ticker]['previousClose'],
+        'price_now': yahoo_object.financial_data[ticker]['currentPrice'],
         'market_cap': yahoo_object.summary_detail[ticker]['marketCap'],
         'free_cash_flow': yahoo_object.financial_data[ticker]['freeCashflow'],
         'pe_ratio': yahoo_object.valuation_measures['PeRatio'].dropna()[-1],
