@@ -5,9 +5,11 @@ from apps.base.models.Control import Control
 class TradingStrategy(Control):
     ADOSC = 'ADOSC'
     MOVING_AVERAGES = 'MOVING AVERAGES'
+    VOLUME_PRESSURE = 'VOLUME PRESSURE'
     TRADING_STRAT_CHOICES = [
         (ADOSC, 'ADOSC'),
-        (MOVING_AVERAGES, 'Moving Averages')
+        (MOVING_AVERAGES, 'Moving Averages'),
+        (VOLUME_PRESSURE, 'Volume Pressure')
     ]
 
     strategy = models.CharField(max_length=20,
