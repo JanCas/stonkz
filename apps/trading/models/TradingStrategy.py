@@ -74,10 +74,11 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
             alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
             portfolio_item.sell(transaction_volume=transaction_volume)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=1)
-        print('shorting {} shares of {}'.format(transaction_volume, ticker))
-        alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
-        portfolio_item.short(transaction_volume=transaction_volume)
-        log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
+        if portfolio_item.transaction_status != 2: # make sure we dont short twice in a row
+            print('shorting {} shares of {}'.format(transaction_volume, ticker))
+            alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
+            portfolio_item.short(transaction_volume=transaction_volume)
+            log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
     # Add other indicators to aid this oscillator, correlation between this and aroon, fall at the same time there is
     # actually a dip
     # MFI, combined with chaikin shows good opportunity to buy

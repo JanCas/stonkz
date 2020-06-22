@@ -23,7 +23,7 @@ def run(name=None):
             print('{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now())))
             portfolio.run()
             portfolio.get_value()
-            print()
+            print('waiting for next period')
         else:
             print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(
                 timezone.localtime(timezone.now())))

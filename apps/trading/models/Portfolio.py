@@ -49,7 +49,10 @@ class Portfolio(Control):
         #run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_price()
-            transaction_volume = math.floor(company.cash_allocated / company.ticker.price_now)
+            if company.transaction_status == company.BUY:
+                transaction_volume = company.shares
+            else:
+                transaction_volume = math.floor(company.cash_allocated / company.ticker.price_now)
             if transaction_volume != 0:
                 kwargs['transaction_volume'] = transaction_volume
                 kwargs['portfolio_item'] = company
