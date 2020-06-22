@@ -10,7 +10,6 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'stonkz.settings'
 django.setup()
 
 
-# TODO: make sure it returns the right things at the right time
 def run(name=None):
     from apps.trading.models.Portfolio import Portfolio
 
@@ -20,10 +19,11 @@ def run(name=None):
 
     def run_recursive():
         if is_trading_hours(timezone.localtime(timezone.now())):
-            print('{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now())))
+            print('------------------------{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now()).time()))
             portfolio.run()
             portfolio.get_value()
             print('waiting for next period')
+            print()
         else:
             print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(
                 timezone.localtime(timezone.now())))
@@ -42,14 +42,13 @@ def trigger_run(name=None):
     scheduler = sched.scheduler(timefunc=time.time, delayfunc=time.sleep)
 
     def trigger_run_recursive():
-        if not is_trading_hours(timezone.localtime(timezone.now())):
-            print('Its not trading hours {}'.format(timezone.localtime(timezone.now())))
-        else:
+        if is_trading_hours(timezone.localtime(timezone.now())):
             print('-----------------------THE MARKET HAS OPENED AT {}----------------------------'.format(
                 timezone.localtime(timezone.now())))
+            print()
             run(name)
         scheduler.enter(60, priority=1, action=trigger_run_recursive)
-
+    print('Waiting for markets to open')
     scheduler.enter(0, priority=1, action=trigger_run_recursive)
     scheduler.run(name)
 
