@@ -25,7 +25,7 @@ class TradingStrategy(Control):
         return self.strategy
 
 
-def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d', fasperiod=3, slowperiod=10):
+def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d', fastperiod=3, slowperiod=10):
     """
     strategy that trades based on reversals in the chaikin oscillator
     :param transaction_volume:
@@ -49,7 +49,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     yahoo_ticker = Ticker(ticker)
     history = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
     ticker_adosc = talib.ADOSC(high=history['high'], low=history['low'], close=history['close'],
-                               volume=history['volume'], fasperiod=fasperiod, slowperiod=slowperiod)
+                               volume=history['volume'], fastperiod=fastperiod, slowperiod=slowperiod)
     ticker_adosc_pct = pct_change(ticker_adosc)
 
     # Buy when in the bottom of a dip in the chalking oscillator graph

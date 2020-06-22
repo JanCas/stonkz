@@ -40,7 +40,7 @@ class PortfolioItems(models.Model):
     def buy(self, transaction_volume):
         self.ticker.update_price()
         self.shares += transaction_volume
-        self.transaction_status = self.HOLD
+        self.transaction_status = self.BUY
         self.stock_value = self.shares * self.ticker.price_now
         self.cash_allocated -= self.stock_value
         self.save()
