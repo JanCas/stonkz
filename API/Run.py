@@ -21,8 +21,9 @@ def run(name=None):
     def run_recursive():
         if is_trading_hours(timezone.localtime(timezone.now())):
             print('{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now())))
-            portfolio.run()
-            portfolio.get_value()
+            #portfolio.run()
+            #portfolio.get_value()
+            print('market is open {}'.format(timezone.localtime(timezone.now())))
         else:
             print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(
                 timezone.localtime(timezone.now())))
