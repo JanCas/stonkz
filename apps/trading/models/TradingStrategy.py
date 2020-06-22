@@ -109,3 +109,33 @@ def simple_moving_average(portfolio_item, transaction_volume, timeperiod=20):
     # if the price goes from above the sma to below, short
     elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'short', 'market', 'day')
+
+def vol_pressure(portfolio_item, transaction_volume):
+    from yahooquery import Ticker
+    import talib
+    import alpaca_trade_api as trade
+    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+
+    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
+
+    yahoo_ticker = Ticker(str(portfolio_item))
+    prices = yahoo_ticker.history()
+
+    vol = prices['volume']
+    VN = vol / talib.EMA(vol, timeperiod=27)
+    BOP = talib.BOP(prices['open'], prices['high'], prices['low'], prices['close'])
+    BP = BOP[BOP > 0]
+    SP = BOP[BOP < 0]
+    BPN = ((BP / talib.EMA(BP, timeperiod=27)) * VN) * 100
+    SPN = ((SP / talib.EMA(SP, timeperiod=27)) * VN) * 100
+    TPN = BPN + SPN
+    nbf = talib.EMA(talib.EMA(BPN, timeperiod=3), timeperiod=3)
+    nsf = talib.EMA(talib.EMA(SPN, timeperiod=3), timeperiod=3)
+    tpf = talib.EMA(talib.EMA(TPN, timeperiod=3), timeperiod=3)
+    vpo2 = ((sum(nbf, 27) - sum(nsf, 27)) / sum(tpf, 27)) * 100
+    Vpo2C = vpo2 > 0
+
+    if Vpo2C:
+        alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
+    elif not Vpo2C:
+        alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
