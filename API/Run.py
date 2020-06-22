@@ -23,14 +23,14 @@ def run(name=None):
             print('{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now())))
             portfolio.run()
             portfolio.get_value()
-            print('market is open {}'.format(timezone.localtime(timezone.now())))
+            print()
         else:
             print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(
                 timezone.localtime(timezone.now())))
             trigger_run(name=name)
         scheduler.enter(portfolio.trading_frequency, priority=1, action=run_recursive)
 
-    scheduler.enter(portfolio.trading_frequency, priority=1, action=run_recursive)
+    scheduler.enter(0, priority=1, action=run_recursive)
     scheduler.run()
 
 
@@ -57,9 +57,9 @@ def trigger_run(name=None):
 def is_trading_hours(time_input):
     from datetime import time
 
-    start_time = time(9,30,0)
-    end_time = time(16,0,0)
-    return time_input.time() > start_time and time_input.time() < end_time and \
+    start_time = time(9, 30, 0)
+    end_time = time(16, 0, 0)
+    return start_time < time_input.time() < end_time and \
            (time_input.isoweekday() not in [6, 7])
 
 
