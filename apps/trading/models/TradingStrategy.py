@@ -25,7 +25,8 @@ class TradingStrategy(Control):
         return self.strategy
 
 
-def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d', fastperiod=3, slowperiod=10):
+def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d',
+          fastperiod=3, slowperiod=10):
     """
     strategy that trades based on reversals in the chaikin oscillator
     :param transaction_volume:
@@ -74,7 +75,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
             alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
             portfolio_item.sell(transaction_volume=transaction_volume)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=1)
-        if portfolio_item.transaction_status != 2: # make sure we dont short twice in a row
+        if portfolio_item.transaction_status != 2:  # make sure we dont short twice in a row
             print('shorting {} shares of {}'.format(transaction_volume, ticker))
             alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
             portfolio_item.short(transaction_volume=transaction_volume)
@@ -110,32 +111,37 @@ def simple_moving_average(portfolio_item, transaction_volume, timeperiod=20):
     elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'short', 'market', 'day')
 
-def vol_pressure(portfolio_item, transaction_volume):
+
+def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5d'):
     from yahooquery import Ticker
     import talib
     import alpaca_trade_api as trade
+    from .TradeHistoryItem import log_trade
     from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
 
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
     yahoo_ticker = Ticker(str(portfolio_item))
-    prices = yahoo_ticker.history()
+    prices = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
 
-    vol = prices['volume']
-    VN = vol / talib.EMA(vol, timeperiod=27)
-    BOP = talib.BOP(prices['open'], prices['high'], prices['low'], prices['close'])
-    BP = BOP[BOP > 0]
-    SP = BOP[BOP < 0]
-    BPN = ((BP / talib.EMA(BP, timeperiod=27)) * VN) * 100
-    SPN = ((SP / talib.EMA(SP, timeperiod=27)) * VN) * 100
-    TPN = BPN + SPN
-    nbf = talib.EMA(talib.EMA(BPN, timeperiod=3), timeperiod=3)
-    nsf = talib.EMA(talib.EMA(SPN, timeperiod=3), timeperiod=3)
-    tpf = talib.EMA(talib.EMA(TPN, timeperiod=3), timeperiod=3)
-    vpo2 = ((sum(nbf, 27) - sum(nsf, 27)) / sum(tpf, 27)) * 100
-    Vpo2C = vpo2 > 0
+    volume = prices['volume']
+    volume_normalized = volume / talib.EMA(volume, timeperiod=long)
+    balance_of_power = talib.BOP(prices['open'], prices['high'], prices['low'], prices['close'])
+    buy_pressure = balance_of_power[balance_of_power > 0]
+    sell_pressure = balance_of_power[balance_of_power < 0]
+    buy_pressure_normalized = ((buy_pressure / talib.EMA(buy_pressure, timeperiod=long)) * volume_normalized) * 100
+    sell_pressure_normalized = ((sell_pressure / talib.EMA(sell_pressure, timeperiod=long)) * volume_normalized) * 100
+    total_pressure_normalized = buy_pressure + sell_pressure
+    nbf = talib.EMA(talib.EMA(buy_pressure_normalized, timeperiod=short), timeperiod=short)
+    nsf = talib.EMA(talib.EMA(sell_pressure_normalized, timeperiod=short), timeperiod=short)
+    tpf = talib.EMA(talib.EMA(total_pressure_normalized, timeperiod=short), timeperiod=short)
+    vpo2 = ((sum(nbf, long) - sum(nsf, long)) / sum(tpf, long)) * 100
 
-    if Vpo2C:
+    if vpo2[-2] < 0 and vpo2[-1] > 0:
+        print('buying {} shares of {}'.format(transaction_volume, str(portfolio_item)))
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
-    elif not Vpo2C:
+        log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
+    elif vpo2[-2] > 0 and vpo2[-1] < 0 and portfolio_item.transaction_status == 0:
+        print('buying {} shares of {}'.format(transaction_volume, str(portfolio_item)))
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
+        log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=1)
