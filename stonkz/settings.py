@@ -120,8 +120,8 @@ USE_L10N = True
 USE_TZ = True
 
 # Alpaca API
-ALPACA_API_KEY = 'PK9YQ82BAVMDWGX8J1YL'
-ALPACA_API_SECRET = 'XW6F2i59jDkYniJM1gbQBQhOydNydtzefWyPjTAu'
+ALPACA_API_KEY = 'PKQV1SSQWNA2MMSZHG2U'
+ALPACA_API_SECRET = 'tCdchyTdjzvcLvRNq5aMcjj2kA5MvoXSNfBmAXot'
 APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
 
 # Static files (CSS, JavaScript, Images)
