@@ -13,6 +13,11 @@ django.setup()
 
 
 def run(name=None):
+    """
+    Runs while markets are open
+    :param name:
+    :return:
+    """
     from apps.trading.models.Portfolio import Portfolio
 
     scheduler = sched.scheduler(timefunc=time.time, delayfunc=time.sleep)
@@ -41,6 +46,12 @@ def run(name=None):
 
 
 def trigger_run(name=None):
+    """
+    Runs during the time that markets arent open
+    Checks for markets opening each minute
+    :param name:
+    :return:
+    """
     if name is None:
         name = sys.argv[1]
         print('name of portfolio: {}'.format(name))
