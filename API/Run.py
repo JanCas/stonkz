@@ -1,7 +1,9 @@
-import django
 import os
+import sched
 import sys
-import sched, time
+import time
+
+import django
 from django.utils import timezone
 
 BASE_PATH = os.path.dirname('../stonkz/')
@@ -19,9 +21,13 @@ def run(name=None):
 
     def run_recursive():
         if is_trading_hours(timezone.localtime(timezone.now())):
-            print('------------------------{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now()).time()))
+            print('------------------------{} is running at {} -----------------'.format(name, timezone.localtime(
+                timezone.now()).time()))
             portfolio.run()
             portfolio.get_value()
+            if portfolio.trading_strategy.method_name == 'simple_moving_average':
+                print('--------checking for liquidation----------')
+                portfolio.liquidate()
             print('waiting for next period')
             print()
         else:
@@ -48,6 +54,7 @@ def trigger_run(name=None):
             print()
             run(name)
         scheduler.enter(60, priority=1, action=trigger_run_recursive)
+
     print('Waiting for markets to open')
     scheduler.enter(0, priority=1, action=trigger_run_recursive)
     scheduler.run(name)
