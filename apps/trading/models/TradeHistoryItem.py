@@ -30,6 +30,6 @@ def log_trade(portfolio_item, transaction_volume, transaction_type):
         'portfolio': portfolio_item.portfolio,
         'ticker': portfolio_item.ticker,
         'transaction_volume': transaction_volume,
-        'trasaction_type': transaction_type
+        'transaction_type': transaction_type
     }
     TradeHistoryItem.objects.create(**kwargs)

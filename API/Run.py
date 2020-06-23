@@ -10,7 +10,6 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'stonkz.settings'
 django.setup()
 
 
-# TODO: make sure it returns the right things at the right time
 def run(name=None):
     from apps.trading.models.Portfolio import Portfolio
 
@@ -20,17 +19,18 @@ def run(name=None):
 
     def run_recursive():
         if is_trading_hours(timezone.localtime(timezone.now())):
-            print('{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now())))
+            print('------------------------{} is running at {} -----------------'.format(name, timezone.localtime(timezone.now()).time()))
             portfolio.run()
             portfolio.get_value()
-            print('market is open {}'.format(timezone.localtime(timezone.now())))
+            print('waiting for next period')
+            print()
         else:
             print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(
                 timezone.localtime(timezone.now())))
             trigger_run(name=name)
         scheduler.enter(portfolio.trading_frequency, priority=1, action=run_recursive)
 
-    scheduler.enter(portfolio.trading_frequency, priority=1, action=run_recursive)
+    scheduler.enter(0, priority=1, action=run_recursive)
     scheduler.run()
 
 
@@ -42,14 +42,13 @@ def trigger_run(name=None):
     scheduler = sched.scheduler(timefunc=time.time, delayfunc=time.sleep)
 
     def trigger_run_recursive():
-        if not is_trading_hours(timezone.localtime(timezone.now())):
-            print('Its not trading hours {}'.format(timezone.localtime(timezone.now())))
-        else:
+        if is_trading_hours(timezone.localtime(timezone.now())):
             print('-----------------------THE MARKET HAS OPENED AT {}----------------------------'.format(
                 timezone.localtime(timezone.now())))
+            print()
             run(name)
         scheduler.enter(60, priority=1, action=trigger_run_recursive)
-
+    print('Waiting for markets to open')
     scheduler.enter(0, priority=1, action=trigger_run_recursive)
     scheduler.run(name)
 
@@ -57,9 +56,9 @@ def trigger_run(name=None):
 def is_trading_hours(time_input):
     from datetime import time
 
-    start_time = time(9,30,0)
-    end_time = time(16,0,0)
-    return time_input.time() > start_time and time_input.time() < end_time and \
+    start_time = time(9, 30, 0)
+    end_time = time(16, 0, 0)
+    return start_time < time_input.time() < end_time and \
            (time_input.isoweekday() not in [6, 7])
 
 

@@ -49,14 +49,17 @@ class Portfolio(Control):
         #run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_price()
-            transaction_volume = math.floor(company.cash_allocated / company.ticker.price_now)
-            kwargs['transaction_volume'] = transaction_volume
-            kwargs['portfolio_item'] = company
-            # get run from TradingStrategy and run it
-            run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'),
+            if company.transaction_status == company.BUY:
+                transaction_volume = company.shares
+            else:
+                transaction_volume = math.floor(company.cash_allocated / company.ticker.price_now)
+            if transaction_volume != 0:
+                kwargs['transaction_volume'] = transaction_volume
+                kwargs['portfolio_item'] = company
+                # get run from TradingStrategy and run it
+                run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'),
                                  self.trading_strategy.method_name)
-            run_method(**kwargs)
-            print()
+                run_method(**kwargs)
 
     def set_name(self):
         from .PortfolioItems import PortfolioItems
@@ -79,6 +82,8 @@ class Portfolio(Control):
     def get_trading_frequency(self):
         if self.trading_frequency == self.ONE_MINUTE:
             return '1m'
+        elif self.trading_frequency == self.FIVE_MINUTES:
+            return '5m'
         elif self.trading_frequency == self.FIFTEEN_MINUTES:
             return '15m'
         elif self.trading_frequency == self.THIRTY_MINUTES:

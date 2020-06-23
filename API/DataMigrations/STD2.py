@@ -9,13 +9,13 @@ os.environ['DJANGO_SETTING_MODULE'] = 'stonkz.settings'
 django.setup()
 
 
-def generate_portfolio(cash=10000, strategy='ADOSC', positions=3):
+def generate_portfolio(name, cash=10000, strategy='ADOSC', positions=3):
     import numpy as np
     from apps.base.models.Tickers import Tickers
     from apps.trading.models.PortfolioItems import PortfolioItems
 
     print('creating Portfolio')
-    portfolio = create_portfolio(strategy=strategy, positions=positions, cash=cash)
+    portfolio = create_portfolio(name=name, strategy=strategy, positions=positions, cash=cash)
     print('portfolio Created')
 
     tickers = np.array(list(Tickers.objects.all()))
@@ -32,20 +32,20 @@ def generate_portfolio(cash=10000, strategy='ADOSC', positions=3):
         PortfolioItems.objects.get_or_create(**kwargs)
 
 
-def create_portfolio(strategy, positions, cash):
+def create_portfolio(name, strategy, positions, cash):
     from apps.trading.models.TradingStrategy import TradingStrategy
     from apps.trading.models.Portfolio import Portfolio
 
     trading_strat = TradingStrategy.objects.get_or_create(**{'strategy': strategy})[0]
 
     kwargs = {
+        'name':name,
         'trading_strategy': trading_strat,
         'positions': positions,
         'starting_cash': cash,
     }
     portfolio = Portfolio.objects.get_or_create(**kwargs)[0]
-    portfolio.set_name()
     return portfolio
 
 
-generate_portfolio(positions=6)
+generate_portfolio(name='trial4', positions=5)
