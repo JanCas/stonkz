@@ -21,7 +21,8 @@ class Portfolio(Control):
     name = models.CharField(max_length=100, default=None, null=True)
     trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
-    trading_frequency = models.IntegerField(default=FIFTEEN_MINUTES, choices=TRADING_Frequency_CHOICES, null=True, blank=True)
+    trading_frequency = models.IntegerField(default=FIFTEEN_MINUTES, choices=TRADING_Frequency_CHOICES, null=True,
+                                            blank=True)
 
     positions = models.IntegerField(default=3, null=False, help_text='# of companies in portfolio')
     value = models.FloatField(default=None, null=True, blank=True, help_text='value of the portfolio')
@@ -46,7 +47,7 @@ class Portfolio(Control):
         for input in TradingStrategyItem.objects.filter(portfolio=self):
             kwargs[input.parameter] = input.get_value()
 
-        #run the trading strategy for each Position
+        # run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_price()
             if company.transaction_status == company.BUY:
@@ -58,8 +59,36 @@ class Portfolio(Control):
                 kwargs['portfolio_item'] = company
                 # get run from TradingStrategy and run it
                 run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'),
-                                 self.trading_strategy.method_name)
+                                     self.trading_strategy.method_name)
                 run_method(**kwargs)
+
+    def liquidate(self):
+        """
+        liquidates all positions in the portfolio if they have 10% gain or 5% loss
+        :return:
+        """
+        import alpaca_trade_api as trade
+        from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+        from .PortfolioItems import PortfolioItems
+        from .TradeHistoryItem import log_trade
+
+        alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
+
+        for company in PortfolioItems.objects.filter(portfolio=self):
+            try:
+                if 10 > alpaca.get_position(str(company)).unrealized_plpc < -5:
+                    if company.transaction_status == company.BUY:
+                        print('selling {} shares of {}'.format(company.shares, str(company)))
+                        alpaca.close_position(str(company))
+                        log_trade(portfolio_item=company, transaction_volume=company.shares, transaction_type=1)
+                        company.sell(transaction_volume=company.shares)
+                    elif company.transaction_status == company.SHORT:
+                        print('Buy to Cover {} shares of {}'.format(company.shares, str(company)))
+                        alpaca.close_position(str(company))
+                        log_trade(portfolio_item=company, transaction_volume=company.shares, transaction_type=2)
+                        company.buy_to_cover(transaction_volume=company.shares)
+            except:
+                print('Stock {} does not exist in alpaca'.format(str(company)))
 
     def set_name(self):
         from .PortfolioItems import PortfolioItems

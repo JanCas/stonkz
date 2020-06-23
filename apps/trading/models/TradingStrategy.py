@@ -62,6 +62,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
         if portfolio_item.transaction_status == 2:  # only buy to cover if stock has been shorted before
             print('buying to cover {} shares of {}'.format(transaction_volume, ticker))
             alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
+            portfolio_item.buy_to_cover(transaction_volume=transaction_volume)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=2)
         print('buying {} shares of {}'.format(transaction_volume, ticker))
         alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
@@ -99,6 +100,7 @@ def simple_moving_average(portfolio_item, transaction_volume):
     import talib
     import alpaca_trade_api as trade
     from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+    from .TradeHistoryItem import log_trade
 
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
@@ -112,13 +114,19 @@ def simple_moving_average(portfolio_item, transaction_volume):
         if data[-timeperiod] < data[-1]:
             return True
 
-
-    # if the price goes from below the sma to above, buy
-    if ma_5 > ma_20 * 1.2 and is_increasing(volume, 3):
-        alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
-    # if the price goes from above the sma to below, short
-    elif ma_5 < ma_20 * .8 and not is_increasing(volume, 3):
-        alpaca.submit_order(str(portfolio_item), transaction_volume, 'short', 'market', 'day')
+    if portfolio_item.shares != 0:
+        # if the price goes from below the sma to above, buy
+        if ma_5 > ma_20 * 1.2 and is_increasing(volume, 3):
+            print('buying {} shares of {}'.format(transaction_volume, str(portfolio_item)))
+            alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
+            portfolio_item.buy(transaction_volume=transaction_volume)
+            log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
+        # if the price goes from above the sma to below, short
+        elif ma_5 < ma_20 * .8 and not is_increasing(volume, 3) and portfolio_item.shares == 0:
+            print('shorting {} shares of {}'.format(transaction_volume, str(portfolio_item)))
+            alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
+            portfolio_item.short(transaction_volume=transaction_volume)
+            log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
 
 
 def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5d'):
