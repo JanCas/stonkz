@@ -87,12 +87,11 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     # MFI, combined with chaikin shows good opportunity to buy
 
 
-def simple_moving_average(portfolio_item, transaction_volume):
+def momentum(portfolio_item, transaction_volume):
     """
     trades based on the crossing of the simple moving average and the closing price
     :param portfolio_item:
     :param transaction_volume:
-    :param timeperiod:
     :return:
     """
     from yahooquery import Ticker
@@ -105,18 +104,16 @@ def simple_moving_average(portfolio_item, transaction_volume):
     yahoo_ticker = Ticker(str(portfolio_item))
     info = yahoo_ticker.history()
     ma_5 = talib.SMA(info['close'], timeperiod=5)
-    ma_20= talib.SMA(info['close'], timeperiod=20)
+    ma_20 = talib.SMA(info['close'], timeperiod=20)
     volume = info['volume']
 
     def is_increasing(data, timeperiod):
         if data[-timeperiod] < data[-1]:
             return True
 
-
-    # if the price goes from below the sma to above, buy
     if ma_5 > ma_20 * 1.2 and is_increasing(volume, 3):
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
-    # if the price goes from above the sma to below, short
+
     elif ma_5 < ma_20 * .8 and not is_increasing(volume, 3):
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'short', 'market', 'day')
 
