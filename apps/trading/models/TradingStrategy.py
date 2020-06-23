@@ -83,7 +83,7 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     # MFI, combined with chaikin shows good opportunity to buy
 
 
-def simple_moving_average(portfolio_item, transaction_volume, timeperiod=20):
+def momentum(portfolio_item, transaction_volume):
     """
     trades based on the crossing of the simple moving average and the closing price
     :param portfolio_item:
@@ -99,14 +99,19 @@ def simple_moving_average(portfolio_item, transaction_volume, timeperiod=20):
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
     yahoo_ticker = Ticker(str(portfolio_item))
-    prices = yahoo_ticker.history()
-    sma = talib.SMA(prices['close'], timeperiod=timeperiod)
+    info = yahoo_ticker.history()
+    ma_5 = talib.SMA(info['close'], timeperiod=5)
+    ma_20 = talib.SMA(info['close'], timeperiod=20)
+    volume = info['volume']
 
-    # if the price goes from below the sma to above, buy
-    if prices['close'][-2] < sma[-2] and prices['close'][-1] > sma[-1]:
+    def is_increasing(data, timeperiod):
+        if data[-timeperiod] < data[-1]:
+            return True
+
+    if ma_5 > ma_20 * 1.2 and is_increasing(volume, 3):
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
-    # if the price goes from above the sma to below, short
-    elif prices['close'][-2] > sma[-2] and prices['close'][-1] < sma[-1]:
+
+    elif ma_5 < ma_20 * 0.8 and not is_increasing(volume, 3):
         alpaca.submit_order(str(portfolio_item), transaction_volume, 'short', 'market', 'day')
 
 def vol_pressure(portfolio_item, transaction_volume):
@@ -117,7 +122,7 @@ def vol_pressure(portfolio_item, transaction_volume):
 
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
-    yahoo_ticker = Ticker(str(portfolio_item))
+    yahoo_ticker = Ticker('AAPL')
     prices = yahoo_ticker.history()
 
     vol = prices['volume']
