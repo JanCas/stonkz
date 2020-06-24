@@ -52,10 +52,10 @@ class Portfolio(Control):
         # run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_price()
-            momentum_active = self.get_num_of_momentum()
-            if momentum_active == self.num_of_momentum:
-                break
             if self.trading_strategy.method_name == 'momentum':
+                momentum_active = self.get_num_of_momentum()
+                if momentum_active == self.num_of_momentum:
+                    break
                 cash_to_item = self.cash_available / (self.num_of_momentum - momentum_active)
                 transaction_volume = floor(cash_to_item / company.ticker.price_now)
                 kwargs['cash_allocation'] = cash_to_item
@@ -87,7 +87,7 @@ class Portfolio(Control):
 
         for company in PortfolioItems.objects.filter(portfolio=self):
             try:
-                if 10 > alpaca.get_position(str(company)).unrealized_plpc < -5:
+                if .1 < alpaca.get_position(str(company)).unrealized_plpc < -.05:
                     if company.transaction_status == company.BUY:
                         print('selling {} shares of {}'.format(company.shares, str(company)))
                         alpaca.close_position(str(company))

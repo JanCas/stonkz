@@ -40,4 +40,3 @@ class Tickers(Control):
         ticker = Ticker(self.symbol)
         self.price_now = ticker.financial_data[self.symbol]['currentPrice']
         self.save()
-b

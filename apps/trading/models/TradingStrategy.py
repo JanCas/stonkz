@@ -96,9 +96,9 @@ def adosc(portfolio_item, buy_threshold_difference=2, sell_threshold_difference=
 def simple_moving_average(portfolio_item, transaction_volume, cash_allocation):
     """
     trades based on the crossing of the simple moving average and the closing price
+    :param cash_allocation:
     :param portfolio_item:
     :param transaction_volume:
-    :param timeperiod:
     :return:
     """
     from yahooquery import Ticker
@@ -126,14 +126,12 @@ def simple_moving_average(portfolio_item, transaction_volume, cash_allocation):
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
             portfolio_item.cash_allocated = cash_allocation
             portfolio_item.buy(transaction_volume=transaction_volume)
-            portfolio_item.used_in_momentum = True
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
         # if the price goes from above the sma to below, short
         elif ma_5 < ma_20 * .8 and not is_increasing(volume, 3) and portfolio_item.shares == 0:
             print('shorting {} shares of {}'.format(transaction_volume, str(portfolio_item)))
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
             portfolio_item.short(transaction_volume=transaction_volume)
-            portfolio_item.used_in_momentum = True
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
 
 
