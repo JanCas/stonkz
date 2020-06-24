@@ -3,9 +3,9 @@ from apps.base.models.Control import Control
 
 
 class TradingStrategy(Control):
-    ADOSC = 'ADOSC'
-    MOVING_AVERAGES = 'MOVING AVERAGES'
-    VOLUME_PRESSURE = 'VOLUME PRESSURE'
+    ADOSC = 'adosc'
+    MOVING_AVERAGES = 'momentum'
+    VOLUME_PRESSURE = 'vol_pressure'
     TRADING_STRAT_CHOICES = [
         (ADOSC, 'ADOSC'),
         (MOVING_AVERAGES, 'Moving Averages'),
@@ -16,8 +16,6 @@ class TradingStrategy(Control):
                                 default=None,
                                 choices=TRADING_STRAT_CHOICES,
                                 null=False)
-
-    method_name = models.CharField(max_length=20, default='adosc', null=False)
 
     class Meta:
         verbose_name_plural = 'Trading Strategies'

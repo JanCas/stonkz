@@ -86,6 +86,8 @@ DATABASES = {
     }
 }
 
+# Remove limit on inlines
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

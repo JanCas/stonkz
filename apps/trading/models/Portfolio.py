@@ -70,7 +70,7 @@ class Portfolio(Control):
                 kwargs['portfolio_item'] = company
                 # get run from TradingStrategy and run it
                 run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'),
-                                     self.trading_strategy.method_name)
+                                     self.trading_strategy.strategy)
                 run_method(**kwargs)
 
     def liquidate(self):
