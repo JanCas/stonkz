@@ -48,4 +48,4 @@ def create_portfolio(name, strategy, positions, cash):
     return portfolio
 
 
-generate_portfolio(name='trial4', positions=5)
+generate_portfolio(name='trial', positions=5)

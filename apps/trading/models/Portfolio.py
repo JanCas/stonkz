@@ -38,22 +38,22 @@ class Portfolio(Control):
         :return:
         """
         import importlib
-        import math
+        from math import floor
         from .PortfolioItems import PortfolioItems
         from .TradingStrategyItems import TradingStrategyItem
 
         # configure the inputs for the trading algorithm
         kwargs = {}
-        for input in TradingStrategyItem.objects.filter(portfolio=self):
-            kwargs[input.parameter] = input.get_value()
+        for input_parameter in TradingStrategyItem.objects.filter(portfolio=self):
+            kwargs[input_parameter.parameter] = input_parameter.get_value()
 
         # run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_price()
-            if company.transaction_status == company.BUY:
-                transaction_volume = company.shares
+            if company.transaction_status == company.BUY or company.transaction_status == company.SHORT:
+                transaction_volume = abs(company.shares)
             else:
-                transaction_volume = math.floor(company.cash_allocated / company.ticker.price_now)
+                transaction_volume = floor(company.cash_allocated / company.ticker.price_now)
             if transaction_volume != 0:
                 kwargs['transaction_volume'] = transaction_volume
                 kwargs['portfolio_item'] = company
