@@ -21,6 +21,7 @@ class PortfolioItems(models.Model):
     total_value = models.FloatField(default=None, blank=True, null=True)
     stock_value = models.FloatField(default=None, blank=True, null=True)
     cash_allocated = models.FloatField(default=None, blank=True, null=True)
+    used_in_momentum = models.BooleanField(default=False, help_text='Only used by the momentum function')
 
     class Meta:
         verbose_name_plural = 'Portfolio Items'
@@ -37,10 +38,12 @@ class PortfolioItems(models.Model):
         self.save()
         return self.total_value
 
-    def buy(self, transaction_volume):
+    def buy(self, transaction_volume, cash_allocated=None):
         self.ticker.update_price()
         self.shares += transaction_volume
         self.transaction_status = self.BUY
+        if self.portfolio.trading_strategy.method_name == 'momentum':
+            self.cash_allocated = cash_allocated
         self.stock_value = self.shares * self.ticker.price_now
         self.cash_allocated -= self.stock_value
         self.save()
