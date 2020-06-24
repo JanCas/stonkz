@@ -27,7 +27,9 @@ class Portfolio(Control):
     positions = models.IntegerField(default=3, null=False, help_text='# of companies in portfolio')
     value = models.FloatField(default=None, null=True, blank=True, help_text='value of the portfolio')
     starting_cash = models.FloatField(default=10000)
+    cash_available = models.FloatField(default=None, null=True, blank=True, help_text='Only used for momentum')
     pct_change = models.FloatField(default=None, null=True, blank=True)
+    num_of_momentum = models.IntegerField(default=None, null=True, blank=True, help_text='Only used for momentum')
 
     def __str__(self):
         return self.name
@@ -50,10 +52,19 @@ class Portfolio(Control):
         # run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_price()
-            if company.transaction_status == company.BUY or company.transaction_status == company.SHORT:
-                transaction_volume = abs(company.shares)
+            momentum_active = self.get_num_of_momentum()
+            if momentum_active == self.num_of_momentum:
+                break
+            if self.trading_strategy.method_name == 'momentum':
+                cash_to_item = self.cash_available / (self.num_of_momentum - momentum_active)
+                transaction_volume = floor(cash_to_item / company.ticker.price_now)
+                kwargs['cash_allocation'] = cash_to_item
             else:
-                transaction_volume = floor(company.cash_allocated / company.ticker.price_now)
+                if company.transaction_status == company.BUY or company.transaction_status == company.SHORT:
+                    transaction_volume = abs(company.shares)
+                else:
+                    transaction_volume = floor(company.cash_allocated / company.ticker.price_now)
+
             if transaction_volume != 0:
                 kwargs['transaction_volume'] = transaction_volume
                 kwargs['portfolio_item'] = company
@@ -82,13 +93,24 @@ class Portfolio(Control):
                         alpaca.close_position(str(company))
                         log_trade(portfolio_item=company, transaction_volume=company.shares, transaction_type=1)
                         company.sell(transaction_volume=company.shares)
+                        company.used_in_momentum = False
                     elif company.transaction_status == company.SHORT:
                         print('Buy to Cover {} shares of {}'.format(company.shares, str(company)))
                         alpaca.close_position(str(company))
                         log_trade(portfolio_item=company, transaction_volume=company.shares, transaction_type=2)
                         company.buy_to_cover(transaction_volume=company.shares)
+                        company.used_in_momentum = False
             except:
-                print('Stock {} does not exist in alpaca'.format(str(company)))
+                pass
+
+    def get_num_of_momentum(self):
+        from .PortfolioItems import PortfolioItems
+
+        count = 0
+        for company in PortfolioItems.objects.filter(portfolio=self):
+            if company.used_in_momentum:
+                count += 1
+        return count
 
     def set_name(self):
         from .PortfolioItems import PortfolioItems

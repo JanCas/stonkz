@@ -93,7 +93,7 @@ def adosc(portfolio_item, buy_threshold_difference=2, sell_threshold_difference=
     # MFI, combined with chaikin shows good opportunity to buy
 
 
-def simple_moving_average(portfolio_item, transaction_volume):
+def simple_moving_average(portfolio_item, transaction_volume, cash_allocation):
     """
     trades based on the crossing of the simple moving average and the closing price
     :param portfolio_item:
@@ -112,25 +112,28 @@ def simple_moving_average(portfolio_item, transaction_volume):
     yahoo_ticker = Ticker(str(portfolio_item))
     info = yahoo_ticker.history()
     ma_5 = talib.SMA(info['close'], timeperiod=5)
-    ma_20= talib.SMA(info['close'], timeperiod=20)
+    ma_20 = talib.SMA(info['close'], timeperiod=20)
     volume = info['volume']
 
     def is_increasing(data, timeperiod):
         if data[-timeperiod] < data[-1]:
             return True
 
-    if portfolio_item.shares != 0:
+    if portfolio_item.shares == 0:
         # if the price goes from below the sma to above, buy
         if ma_5 > ma_20 * 1.2 and is_increasing(volume, 3):
             print('buying {} shares of {}'.format(transaction_volume, str(portfolio_item)))
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
+            portfolio_item.cash_allocated = cash_allocation
             portfolio_item.buy(transaction_volume=transaction_volume)
+            portfolio_item.used_in_momentum = True
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
         # if the price goes from above the sma to below, short
         elif ma_5 < ma_20 * .8 and not is_increasing(volume, 3) and portfolio_item.shares == 0:
             print('shorting {} shares of {}'.format(transaction_volume, str(portfolio_item)))
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
             portfolio_item.short(transaction_volume=transaction_volume)
+            portfolio_item.used_in_momentum = True
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
 
 
