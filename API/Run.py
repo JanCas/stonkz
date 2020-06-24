@@ -30,10 +30,9 @@ def run(name=None):
                 timezone.now()).time()))
             portfolio.run()
             portfolio.get_value()
-            if portfolio.trading_strategy.method_name == 'simple_moving_average':
-                print('--------checking for liquidation----------')
-                portfolio.liquidate()
-            print('waiting for next period')
+            print('--------checking for liquidation----------')
+            portfolio.liquidate()
+            print('waiting for next period...')
             print()
         else:
             print('-----------------------THE MARKET HAS CLOSED AT {}----------------------------'.format(

@@ -27,7 +27,7 @@ class TradingStrategy(Control):
         return self.strategy
 
 
-def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d',
+def adosc(portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d',
           fastperiod=3, slowperiod=10):
     """
     strategy that trades based on reversals in the chaikin oscillator
@@ -36,11 +36,13 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     :param buy_threshold_difference:
     :param sell_threshold_difference:
     :param period:
-    :param fasperiod:
+    :param fastperiod:
     :param slowperiod:
     :return:
     """
     from yahooquery import Ticker
+    from time import sleep
+    from math import floor
     import talib
     import alpaca_trade_api as trade
     from .TradeHistoryItem import log_trade
@@ -58,12 +60,13 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     # Buy when in the bottom of a dip in the chalking oscillator graph
     if ticker_adosc_pct[-2] < 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > buy_threshold_difference and \
-            ticker_adosc_pct[-1] > 0:
+            ticker_adosc_pct[-1] > 0 and portfolio_item.transaction_status != portfolio_item.BUY:
         if portfolio_item.transaction_status == 2:  # only buy to cover if stock has been shorted before
             print('buying to cover {} shares of {}'.format(transaction_volume, ticker))
             alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
             portfolio_item.buy_to_cover(transaction_volume=transaction_volume)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=2)
+            sleep(1) # hopefully combats 403 alpaca error
         print('buying {} shares of {}'.format(transaction_volume, ticker))
         alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
@@ -73,12 +76,14 @@ def adosc(transaction_volume, portfolio_item, buy_threshold_difference=2, sell_t
     elif ticker_adosc_pct[-2] > 0 and \
             abs(ticker_adosc_pct[-2] - ticker_adosc_pct[-1]) > sell_threshold_difference and \
             ticker_adosc_pct[-1] < 0:
-        if portfolio_item.transaction_status == 0:  # making sure stock exists before selling it
+        if portfolio_item.transaction_status == portfolio_item.BUY:  # making sure stock exists before selling it
             print('selling {} shares of {}'.format(transaction_volume, ticker))
             alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
             portfolio_item.sell(transaction_volume=transaction_volume)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=1)
-        if portfolio_item.transaction_status != 2:  # make sure we dont short twice in a row
+            sleep(1)
+        if portfolio_item.transaction_status != portfolio_item.SHORT:  # make sure we dont short twice in a row
+            transaction_volume = floor(portfolio_item.cash_allocated / (portfolio_item.ticker.price_now * 1.1)) # gives us a 10% buffer if the stock goes the other way
             print('shorting {} shares of {}'.format(transaction_volume, ticker))
             alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
             portfolio_item.short(transaction_volume=transaction_volume)
