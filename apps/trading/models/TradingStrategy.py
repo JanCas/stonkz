@@ -150,17 +150,17 @@ def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5
     prices = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
 
     volume = prices['volume']
-    volume_normalized = volume / talib.EMA(volume, timeperiod=long)
+    volume_normalized = (volume / talib.EMA(volume, timeperiod=long)).dropna()
     balance_of_power = talib.BOP(prices['open'], prices['high'], prices['low'], prices['close'])
     buy_pressure = balance_of_power[balance_of_power > 0]
     sell_pressure = balance_of_power[balance_of_power < 0]
-    buy_pressure_normalized = ((buy_pressure / talib.EMA(buy_pressure, timeperiod=long)) * volume_normalized) * 100
-    sell_pressure_normalized = ((sell_pressure / talib.EMA(sell_pressure, timeperiod=long)) * volume_normalized) * 100
-    total_pressure_normalized = buy_pressure + sell_pressure
-    nbf = talib.EMA(talib.EMA(buy_pressure_normalized, timeperiod=short), timeperiod=short)
-    nsf = talib.EMA(talib.EMA(sell_pressure_normalized, timeperiod=short), timeperiod=short)
-    tpf = talib.EMA(talib.EMA(total_pressure_normalized, timeperiod=short), timeperiod=short)
-    vpo2 = ((sum(nbf, long) - sum(nsf, long)) / sum(tpf, long)) * 100
+    buy_pressure_normalized = (((buy_pressure / talib.EMA(buy_pressure, timeperiod=long)) * volume_normalized) * 100).dropna()
+    sell_pressure_normalized = (((sell_pressure / talib.EMA(sell_pressure, timeperiod=long)) * volume_normalized) * 100).dropna()
+    total_pressure_normalized = (buy_pressure + sell_pressure).dropna()
+    nbf = talib.WMA(talib.EMA(buy_pressure_normalized, timeperiod=short), timeperiod=short)
+    nsf = talib.WMA(talib.EMA(sell_pressure_normalized, timeperiod=short), timeperiod=short)
+    tpf = talib.WMA(talib.EMA(total_pressure_normalized, timeperiod=short), timeperiod=short)
+    vpo2 = ((sum(nbf, 27) - sum(nsf, 27)) / sum(tpf, 27)) * 100
 
     if vpo2[-2] < 0 and vpo2[-1] > 0:
         print('buying {} shares of {}'.format(transaction_volume, str(portfolio_item)))
