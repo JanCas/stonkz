@@ -25,7 +25,7 @@ class TradingStrategy(Control):
         return self.strategy
 
 
-def adosc(portfolio_item, buy_threshold_difference=2, sell_threshold_difference=2, period='5d',
+def adosc(portfolio_item,transaction_volume, buy_threshold_difference=2, sell_threshold_difference=2, period='5d',
           fastperiod=3, slowperiod=10):
     """
     strategy that trades based on reversals in the chaikin oscillator
@@ -64,7 +64,7 @@ def adosc(portfolio_item, buy_threshold_difference=2, sell_threshold_difference=
             alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
             portfolio_item.buy_to_cover(transaction_volume=transaction_volume)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=2)
-            sleep(1) # hopefully combats 403 alpaca error
+            sleep(1)  # hopefully combats 403 alpaca error
         print('buying {} shares of {}'.format(transaction_volume, ticker))
         alpaca.submit_order(ticker, transaction_volume, 'buy', 'market', 'day')
         portfolio_item.buy(transaction_volume=transaction_volume)
@@ -81,7 +81,8 @@ def adosc(portfolio_item, buy_threshold_difference=2, sell_threshold_difference=
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=1)
             sleep(1)
         if portfolio_item.transaction_status != portfolio_item.SHORT:  # make sure we dont short twice in a row
-            transaction_volume = floor(portfolio_item.cash_allocated / (portfolio_item.ticker.price_now * 1.1)) # gives us a 10% buffer if the stock goes the other way
+            transaction_volume = floor(portfolio_item.cash_allocated / (
+                        portfolio_item.ticker.price_now * 1.1))  # gives us a 10% buffer if the stock goes the other way
             print('shorting {} shares of {}'.format(transaction_volume, ticker))
             alpaca.submit_order(ticker, transaction_volume, 'sell', 'market', 'day')
             portfolio_item.short(transaction_volume=transaction_volume)
@@ -100,10 +101,12 @@ def simple_moving_average(portfolio_item, transaction_volume, cash_allocation):
     :return:
     """
     from yahooquery import Ticker
+    from math import floor
     import talib
     import alpaca_trade_api as trade
     from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
     from .TradeHistoryItem import log_trade
+    from API.Help import is_increasing
 
     alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
 
@@ -113,23 +116,19 @@ def simple_moving_average(portfolio_item, transaction_volume, cash_allocation):
     ma_20 = talib.SMA(info['close'], timeperiod=20)
     volume = info['volume']
 
-    def is_increasing(data, timeperiod):
-        if data[-timeperiod] < data[-1]:
-            return True
-
     if portfolio_item.shares == 0:
         # if the price goes from below the sma to above, buy
         if ma_5 > ma_20 * 1.2 and is_increasing(volume, 3):
             print('buying {} shares of {}'.format(transaction_volume, str(portfolio_item)))
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
-            portfolio_item.cash_allocated = cash_allocation
-            portfolio_item.buy(transaction_volume=transaction_volume)
+            portfolio_item.buy(transaction_volume=transaction_volume, cash_allocated=cash_allocation)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
         # if the price goes from above the sma to below, short
         elif ma_5 < ma_20 * .8 and not is_increasing(volume, 3) and portfolio_item.shares == 0:
+            transaction_volume = floor(cash_allocation / (portfolio_item.ticker.price_now * 1.1))
             print('shorting {} shares of {}'.format(transaction_volume, str(portfolio_item)))
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
-            portfolio_item.short(transaction_volume=transaction_volume)
+            portfolio_item.short(transaction_volume=transaction_volume, cash_allocated=cash_allocation)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=3)
 
 
@@ -150,8 +149,10 @@ def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5
     balance_of_power = talib.BOP(prices['open'], prices['high'], prices['low'], prices['close'])
     buy_pressure = balance_of_power[balance_of_power > 0]
     sell_pressure = balance_of_power[balance_of_power < 0]
-    buy_pressure_normalized = (((buy_pressure / talib.EMA(buy_pressure, timeperiod=long)) * volume_normalized) * 100).dropna()
-    sell_pressure_normalized = (((sell_pressure / talib.EMA(sell_pressure, timeperiod=long)) * volume_normalized) * 100).dropna()
+    buy_pressure_normalized = (
+                ((buy_pressure / talib.EMA(buy_pressure, timeperiod=long)) * volume_normalized) * 100).dropna()
+    sell_pressure_normalized = (
+                ((sell_pressure / talib.EMA(sell_pressure, timeperiod=long)) * volume_normalized) * 100).dropna()
     total_pressure_normalized = (buy_pressure + sell_pressure).dropna()
     nbf = talib.WMA(talib.EMA(buy_pressure_normalized, timeperiod=short), timeperiod=short)
     nsf = talib.WMA(talib.EMA(sell_pressure_normalized, timeperiod=short), timeperiod=short)

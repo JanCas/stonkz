@@ -39,7 +39,7 @@ class Portfolio(Control):
         runs the appropriate trading strategy on that portfolio
         :return:
         """
-        import importlib
+        from importlib import import_module
         from math import floor
         from .PortfolioItems import PortfolioItems
         from .TradingStrategyItems import TradingStrategyItem
@@ -52,7 +52,7 @@ class Portfolio(Control):
         # run the trading strategy for each Position
         for company in PortfolioItems.objects.filter(portfolio=self):
             company.ticker.update_price()
-            if self.trading_strategy.method_name == 'momentum':
+            if self.trading_strategy.strategy == 'momentum':
                 momentum_active = self.get_num_of_momentum()
                 if momentum_active == self.num_of_momentum:
                     break
@@ -69,7 +69,7 @@ class Portfolio(Control):
                 kwargs['transaction_volume'] = transaction_volume
                 kwargs['portfolio_item'] = company
                 # get run from TradingStrategy and run it
-                run_method = getattr(importlib.import_module('apps.trading.models.TradingStrategy'),
+                run_method = getattr(import_module('apps.trading.models.TradingStrategy'),
                                      self.trading_strategy.strategy)
                 run_method(**kwargs)
 
