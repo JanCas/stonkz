@@ -10,6 +10,7 @@ from .models.TradeHistoryItem import TradeHistoryItem
 # Register your models here.
 class PortfolioItemInline(admin.TabularInline):
     model = PortfolioItems
+    ordering = ('-used_in_momentum',)
 
 
 class TradingStrategyItemInline(admin.TabularInline):
