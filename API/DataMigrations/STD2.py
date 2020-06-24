@@ -5,7 +5,7 @@ import random
 
 BASE_PATH = os.path.dirname('../stonkz/')
 sys.path.append(BASE_PATH)
-os.environ['DJANGO_SETTING_MODULE'] = 'stonkz.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'stonkz.settings'
 django.setup()
 
 
