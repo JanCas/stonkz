@@ -1,8 +1,7 @@
-from apps.base.models.Control import Control
 from django.db import models
 
 
-class Tickers(Control):
+class Tickers(models.Model):
     symbol = models.CharField(max_length= 20, default=None, null=False)
     previous_closing_price = models.FloatField(default=None, null=True)
     price_now = models.FloatField(default=None, null=True)

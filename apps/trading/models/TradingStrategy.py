@@ -1,8 +1,7 @@
 from django.db import models
-from apps.base.models.Control import Control
 
 
-class TradingStrategy(Control):
+class TradingStrategy(models.Model):
     ADOSC = 'adosc'
     MOVING_AVERAGES = 'momentum'
     VOLUME_PRESSURE = 'vol_pressure'

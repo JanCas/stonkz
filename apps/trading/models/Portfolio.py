@@ -1,10 +1,7 @@
 from django.db import models
 
-from apps.base.models.Control import Control
-from apps.trading.models.TradingStrategy import TradingStrategy
 
-
-class Portfolio(Control):
+class Portfolio(models.Model):
     ONE_MINUTE = 60
     TWO_MINUTES = 120
     FIVE_MINUTES = 300
@@ -21,7 +18,7 @@ class Portfolio(Control):
     ]
 
     name = models.CharField(max_length=100, default=None, null=True)
-    trading_strategy = models.ForeignKey(TradingStrategy, on_delete=models.SET_NULL, null=True,
+    trading_strategy = models.ForeignKey('trading.TradingStrategy', on_delete=models.SET_NULL, null=True,
                                          verbose_name='Trading Strategy')
     trading_frequency = models.IntegerField(default=FIFTEEN_MINUTES, choices=TRADING_Frequency_CHOICES, null=True,
                                             blank=True)

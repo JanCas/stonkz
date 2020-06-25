@@ -42,7 +42,7 @@ class PortfolioItems(models.Model):
         self.ticker.update_price()
         self.shares += transaction_volume
         self.transaction_status = self.BUY
-        if self.portfolio.trading_strategy.method_name == 'momentum':
+        if str(self.portfolio.trading_strategy) == 'momentum':
             self.cash_allocated = cash_allocated
             self.used_in_momentum = True
         self.stock_value = self.shares * self.ticker.price_now
@@ -55,7 +55,7 @@ class PortfolioItems(models.Model):
         self.shares -= transaction_volume
         self.transaction_status = self.SOLD
         self.stock_value = self.shares * self.ticker.price_now
-        if self.portfolio.trading_strategy.method_name == 'momentum':
+        if str(self.portfolio.trading_strategy) == 'momentum':
             self.portfolio.cash_available += self.cash_allocated
             self.used_in_momentum = False
             self.cash_allocated = None
@@ -66,7 +66,7 @@ class PortfolioItems(models.Model):
         self.transaction_status = self.SHORT
         self.stock_value = None
         self.shares -= transaction_volume
-        if self.portfolio.trading_strategy.method_name == 'momentum':
+        if str(self.portfolio.trading_strategy) == 'momentum':
             self.cash_allocated = cash_allocated
             self.used_in_momentum = True
         self.save()
@@ -76,7 +76,7 @@ class PortfolioItems(models.Model):
         self.transaction_status = self.BUY_TO_COVER
         self.shares += transaction_volume
         self.stock_value = None
-        if self.portfolio.trading_strategy.method_name == 'momentum':
+        if str(self.portfolio.trading_strategy) == 'momentum':
             self.portfolio.cash_available += self.cash_allocated
             self.used_in_momentum = False
             self.cash_allocated = None
