@@ -1,7 +1,7 @@
 from django.db import models
 
-class TradingStrategyItem(models.Model):
 
+class TradingStrategyItem(models.Model):
     INT = 0
     STRING = 1
     FLOAT = 2

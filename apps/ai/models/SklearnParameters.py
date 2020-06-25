@@ -1,6 +1,5 @@
 from django.db import models
 
-from apps.base.models.Control import Control
 
-class SklearnParameters(Control):
+class SklearnParameters(models.Model):
     pass
