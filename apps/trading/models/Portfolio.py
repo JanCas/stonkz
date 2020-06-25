@@ -6,12 +6,14 @@ from apps.trading.models.TradingStrategy import TradingStrategy
 
 class Portfolio(Control):
     ONE_MINUTE = 60
+    TWO_MINUTES = 120
     FIVE_MINUTES = 300
     FIFTEEN_MINUTES = 900
     THIRTY_MINUTES = 1800
     ONE_HOUR = 3600
     TRADING_Frequency_CHOICES = [
         (ONE_MINUTE, '1min'),
+        (TWO_MINUTES, '2min'),
         (FIVE_MINUTES, '5min'),
         (FIFTEEN_MINUTES, '15min'),
         (THIRTY_MINUTES, '30min'),
@@ -55,6 +57,7 @@ class Portfolio(Control):
             if self.trading_strategy.strategy == 'momentum':
                 momentum_active = self.get_num_of_momentum()
                 if momentum_active == self.num_of_momentum:
+                    print('max companies already traded')
                     break
                 cash_to_item = self.cash_available / (self.num_of_momentum - momentum_active)
                 transaction_volume = floor(cash_to_item / company.ticker.price_now)
@@ -124,8 +127,16 @@ class Portfolio(Control):
         from .PortfolioItems import PortfolioItems
 
         self.value = 0
-        for stock in PortfolioItems.objects.filter(portfolio=self):
-            self.value += stock.set_value()
+        if self.trading_strategy.strategy == 'momentum':
+            if self.get_num_of_momentum() == 0:
+                return
+            else:
+                for stock in PortfolioItems.objects.filter(portfolio=self, used_in_momentum=True):
+                    self.value += stock.set_value
+                self.value += self.cash_available
+        else:
+            for stock in PortfolioItems.objects.filter(portfolio=self):
+                self.value += stock.set_value()
 
         self.pct_change = (self.value - self.starting_cash) / self.starting_cash * 100.0
         self.save()
@@ -141,3 +152,16 @@ class Portfolio(Control):
             return '30m'
         elif self.trading_frequency == self.ONE_HOUR:
             return '60m'
+
+    def get_max_period(self):
+        from django.utils import timezone
+
+        if self.trading_frequency == self.ONE_MINUTE:
+            return timezone.now().date() - timezone.timedelta(days=6)
+        elif self.trading_frequency == self.TWO_MINUTES or \
+            self.trading_frequency == self.FIVE_MINUTES or \
+            self.trading_frequency == self.FIFTEEN_MINUTES or \
+            self.trading_frequency == self.THIRTY_MINUTES:
+            return timezone.now().date() - timezone.timedelta(days=59)
+        elif self.trading_frequency == self.ONE_HOUR:
+            return timezone.now().date() - timezone.timedelta(days=729)
