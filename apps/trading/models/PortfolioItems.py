@@ -22,6 +22,7 @@ class PortfolioItems(models.Model):
     stock_value = models.FloatField(default=None, blank=True, null=True)
     cash_allocated = models.FloatField(default=None, blank=True, null=True)
     used_in_momentum = models.BooleanField(default=False, help_text='Only used by the momentum function')
+    ai_model = models.ForeignKey('ai.ModelTraining', default=None, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'Portfolio Items'
