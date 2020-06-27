@@ -43,10 +43,10 @@ def adosc(portfolio_item,transaction_volume, buy_threshold_difference=2, sell_th
     import talib
     import alpaca_trade_api as trade
     from .TradeHistoryItem import log_trade
-    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL
     from API.Help import pct_change
 
-    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
+    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL, api_version='v2')
     ticker = str(portfolio_item)
     yahoo_ticker = Ticker(ticker)
     history = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
@@ -103,11 +103,11 @@ def momentum(portfolio_item, transaction_volume, cash_allocation):
     from math import floor
     import talib
     import alpaca_trade_api as trade
-    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL
     from .TradeHistoryItem import log_trade
     from API.Help import is_increasing
 
-    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
+    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL, api_version='v2')
 
     yahoo_ticker = Ticker(str(portfolio_item))
     info = yahoo_ticker.history()
@@ -136,9 +136,9 @@ def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5
     import talib
     import alpaca_trade_api as trade
     from .TradeHistoryItem import log_trade
-    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL
 
-    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
+    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL, api_version='v2')
 
     yahoo_ticker = Ticker(str(portfolio_item))
     prices = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
