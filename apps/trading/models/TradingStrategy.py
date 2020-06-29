@@ -143,11 +143,69 @@ def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5
     yahoo_ticker = Ticker(str(portfolio_item))
     prices = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
 
+    close = prices['close']
+    high = prices['high']
+    open = prices['open']
+    low = prices['low']
+
+
     volume = prices['volume']
     volume_normalized = (volume / talib.EMA(volume, timeperiod=long)).dropna()
-    balance_of_power = talib.BOP(prices['open'], prices['high'], prices['low'], prices['close'])
-    buy_pressure = balance_of_power[balance_of_power > 0]
-    sell_pressure = balance_of_power[balance_of_power < 0]
+
+    if close[-1] < open[-1]:
+        if close[-2] < open[-1]:
+            buy_pressure = max(high - close, close - low)
+        else:
+            buy_pressure = max(high - open, close - low)
+    elif close[-1] > open[-1]:
+        if close[-2] > open[-1]:
+            buy_pressure = high - low
+        else:
+            buy_pressure = max(open - close, high - low)
+    elif high[-1] - close[-1] > close[-1] - low[-1]:
+        if close[-2] < open[-1]:
+            buy_pressure = max(high - close, close - low)
+        else:
+            buy_pressure = high - open
+    elif high[-1] - close[-1] < close[-1] - low[-1]:
+        if close[-2] > open[-1]:
+            buy_pressure = high - low
+        else:
+            buy_pressure = max(open - close, high - low)
+    elif close[-2] > open[-1]:
+        buy_pressure = max(high - open, close - low)
+    elif close[-2] < open[-1]:
+        buy_pressure = max(open - close, high - low)
+    else:
+        buy_pressure = high - low
+
+    if close[-1] < open[-1]:
+        if close[-2] > open[-1]:
+            sell_pressure = max(close - open, high - low)
+        else:
+            sell_pressure = high - low
+    elif close[-1] > open[-1]:
+        if close[-2] > open[-1]:
+            sell_pressure = max(close - low, high - close)
+        else:
+            sell_pressure = max(open - low, high - close)
+    elif high[-1] - close[-1] > close[-1] - low[-1]:
+        if close[-2] > open[-1]:
+            sell_pressure = max(close - open, high - low)
+        else:
+            sell_pressure = high - low
+    elif high[-1] - close[-1] < close[-1] - low[-1]:
+        if close[-2] > open[-1]:
+            sell_pressure = max(close - open, high - low)
+        else:
+            sell_pressure = open - low
+    elif close[-2] > open[-1]:
+        sell_pressure = max(close - open, high - low)
+    elif close[-2] < open[-1]:
+        sell_pressure = max(open - low, high - close)
+    else:
+        sell_pressure = high - low
+
     buy_pressure_normalized = (
                 ((buy_pressure / talib.EMA(buy_pressure, timeperiod=long)) * volume_normalized) * 100).dropna()
     sell_pressure_normalized = (
