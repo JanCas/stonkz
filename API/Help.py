@@ -17,3 +17,14 @@ def import_sklearn_module(sklearn_module):
     model_name = decomposed_string[-1]
 
     return getattr(import_module(import_string), model_name)
+
+def construct_max(s1, s2):
+    import pandas as pd
+    assert(len(s1) == len(s2))
+
+    max_list = []
+    for x in range(0,len(s1)):
+        max_list.append(max(s1[x], s2[x]))
+
+    series = pd.Series(max_list)
+    return series
