@@ -19,7 +19,7 @@ def populate_portfolio(name, cash, num_of_momentum=5):
     print('portfolio created')
 
     tickers = np.array(list(Tickers.objects.all()))
-    ticker_indeces = sample(range(len(tickers)), 400)
+    ticker_indeces = sample(range(len(tickers)), 100)
 
     print('creating items')
     for ticker in tickers[ticker_indeces]:

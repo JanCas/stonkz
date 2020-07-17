@@ -30,12 +30,10 @@ class PortfolioItems(models.Model):
     def __str__(self):
         return self.ticker.symbol
 
-    def set_value(self):
+    def set_value(self, alpaca):
         self.ticker.update_price()
-        self.stock_value = abs(self.shares) * self.ticker.price_now
+        self.stock_value = alpaca.get_position(str(self.ticker)).unrealized_pl
         self.total_value = self.stock_value + self.cash_allocated
-        if self.transaction_status is self.SHORT:
-            self.stock_value = None
         self.save()
         return self.total_value
 
@@ -44,6 +42,7 @@ class PortfolioItems(models.Model):
         self.shares += transaction_volume
         self.transaction_status = self.BUY
         if str(self.portfolio.trading_strategy) == 'momentum':
+            self.portfolio.update_cash_available(cash_available=cash_allocated, sign=-1)
             self.cash_allocated = cash_allocated
             self.used_in_momentum = True
         self.stock_value = self.shares * self.ticker.price_now
@@ -57,7 +56,7 @@ class PortfolioItems(models.Model):
         self.transaction_status = self.SOLD
         self.stock_value = self.shares * self.ticker.price_now
         if str(self.portfolio.trading_strategy) == 'momentum':
-            self.portfolio.cash_available += self.cash_allocated
+            self.portfolio.update_cash_available(cash_available=self.cash_allocated, sign=1)
             self.used_in_momentum = False
             self.cash_allocated = None
         self.save()
@@ -68,6 +67,7 @@ class PortfolioItems(models.Model):
         self.stock_value = None
         self.shares -= transaction_volume
         if str(self.portfolio.trading_strategy) == 'momentum':
+            self.portfolio.update_cash_available(cash_available=cash_allocated, sign=-1)
             self.cash_allocated = cash_allocated
             self.used_in_momentum = True
         self.save()
@@ -78,7 +78,7 @@ class PortfolioItems(models.Model):
         self.shares += transaction_volume
         self.stock_value = None
         if str(self.portfolio.trading_strategy) == 'momentum':
-            self.portfolio.cash_available += self.cash_allocated
+            self.portfolio.update_cash_available(cash_available=self.cash_allocated, sign=1)
             self.used_in_momentum = False
             self.cash_allocated = None
         self.save()
