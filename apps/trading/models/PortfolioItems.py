@@ -33,7 +33,10 @@ class PortfolioItems(models.Model):
     def set_value(self, alpaca):
         self.ticker.update_price()
         self.stock_value = alpaca.get_position(str(self.ticker)).unrealized_pl
-        self.total_value = self.stock_value + self.cash_allocated
+        if self.transaction_status == self.SHORT:
+            self.total_value = self.cash_allocated
+        else:
+            self.total_value = self.stock_value + self.cash_allocated
         self.save()
         return self.total_value
 
