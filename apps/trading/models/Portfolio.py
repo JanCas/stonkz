@@ -78,12 +78,11 @@ class Portfolio(models.Model):
         liquidates all positions in the portfolio if they have 10% gain or 5% loss
         :return:
         """
-        import alpaca_trade_api as trade
-        from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL
+        from API.Help import initialize_alpaca
         from .PortfolioItems import PortfolioItems
         from .TradeHistoryItem import log_trade
 
-        alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, APCA_API_BASE_URL, api_version='v2')
+        alpaca = initialize_alpaca()
 
         for company in PortfolioItems.objects.filter(portfolio=self):
             try:
@@ -122,6 +121,9 @@ class Portfolio(models.Model):
 
     def get_value(self):
         from .PortfolioItems import PortfolioItems
+        from API.Help import initialize_alpaca
+
+        alpaca = initialize_alpaca()
 
         self.value = 0
         if self.trading_strategy.strategy == 'momentum':
@@ -129,11 +131,11 @@ class Portfolio(models.Model):
                 return
             else:
                 for stock in PortfolioItems.objects.filter(portfolio=self, used_in_momentum=True):
-                    self.value += stock.set_value
+                    self.value += stock.set_value(alpaca=alpaca)
                 self.value += self.cash_available
         else:
             for stock in PortfolioItems.objects.filter(portfolio=self):
-                self.value += stock.set_value()
+                self.value += stock.set_value(alpaca=alpaca)
 
         self.pct_change = (self.value - self.starting_cash) / self.starting_cash * 100.0
         self.save()
@@ -162,3 +164,7 @@ class Portfolio(models.Model):
             return timezone.now().date() - timezone.timedelta(days=59)
         elif self.trading_frequency == self.ONE_HOUR:
             return timezone.now().date() - timezone.timedelta(days=729)
+
+    def update_cash_available(self, cash_available, sign):
+        self.cash_available += (cash_available * sign)
+        self.save()

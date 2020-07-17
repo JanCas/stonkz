@@ -41,12 +41,10 @@ def adosc(portfolio_item,transaction_volume, buy_threshold_difference=2, sell_th
     from time import sleep
     from math import floor
     import talib
-    import alpaca_trade_api as trade
     from .TradeHistoryItem import log_trade
-    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL
-    from API.Help import pct_change
+    from API.Help import pct_change, initialize_alpaca
 
-    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL, api_version='v2')
+    alpaca = initialize_alpaca()
     ticker = str(portfolio_item)
     yahoo_ticker = Ticker(ticker)
     history = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
@@ -102,12 +100,10 @@ def momentum(portfolio_item, transaction_volume, cash_allocation):
     from yahooquery import Ticker
     from math import floor
     import talib
-    import alpaca_trade_api as trade
-    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL
     from .TradeHistoryItem import log_trade
-    from API.Help import is_increasing
+    from API.Help import is_increasing, initialize_alpaca
 
-    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL, api_version='v2')
+    alpaca = initialize_alpaca()
 
     yahoo_ticker = Ticker(str(portfolio_item))
     info = yahoo_ticker.history()
@@ -117,13 +113,13 @@ def momentum(portfolio_item, transaction_volume, cash_allocation):
 
     if portfolio_item.shares == 0:
         # if the price goes from below the sma to above, buy
-        if ma_5[-1] > (ma_20[-1] * 1.2) and is_increasing(volume, 3):
+        if ma_5[-1] > (ma_20[-1] * 1.1) and is_increasing(volume, 3):
             print('buying {} shares of {}'.format(transaction_volume, str(portfolio_item)))
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'buy', 'market', 'day')
             portfolio_item.buy(transaction_volume=transaction_volume, cash_allocated=cash_allocation)
             log_trade(portfolio_item=portfolio_item, transaction_volume=transaction_volume, transaction_type=0)
         # if the price goes from above the sma to below, short
-        elif ma_5[-1] < (ma_20[-1] * .8) and not is_increasing(volume, 3) and portfolio_item.shares == 0:
+        elif ma_5[-1] < (ma_20[-1] * .9) and not is_increasing(volume, 3) and portfolio_item.shares == 0:
             transaction_volume = floor(cash_allocation / (portfolio_item.ticker.price_now * 1.1))
             print('shorting {} shares of {}'.format(transaction_volume, str(portfolio_item)))
             alpaca.submit_order(str(portfolio_item), transaction_volume, 'sell', 'market', 'day')
@@ -134,11 +130,10 @@ def momentum(portfolio_item, transaction_volume, cash_allocation):
 def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5d'):
     from yahooquery import Ticker
     import talib
-    import alpaca_trade_api as trade
     from .TradeHistoryItem import log_trade
-    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL
+    from API.Help import construct_max, initialize_alpaca
 
-    alpaca = trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL, api_version='v2')
+    alpaca = initialize_alpaca()
 
     yahoo_ticker = Ticker(str(portfolio_item))
     prices = yahoo_ticker.history(period=period, interval=portfolio_item.portfolio.get_trading_frequency())
@@ -154,55 +149,55 @@ def vol_pressure(portfolio_item, transaction_volume, long=27, short=3, period='5
 
     if close[-1] < open[-1]:
         if close[-2] < open[-1]:
-            buy_pressure = max(high - close, close - low)
+            buy_pressure = construct_max(high - close, close - low)
         else:
-            buy_pressure = max(high - open, close - low)
+            buy_pressure = construct_max(high - open, close - low)
     elif close[-1] > open[-1]:
         if close[-2] > open[-1]:
             buy_pressure = high - low
         else:
-            buy_pressure = max(open - close, high - low)
+            buy_pressure = construct_max(open - close, high - low)
     elif high[-1] - close[-1] > close[-1] - low[-1]:
         if close[-2] < open[-1]:
-            buy_pressure = max(high - close, close - low)
+            buy_pressure = construct_max(high - close, close - low)
         else:
             buy_pressure = high - open
     elif high[-1] - close[-1] < close[-1] - low[-1]:
         if close[-2] > open[-1]:
             buy_pressure = high - low
         else:
-            buy_pressure = max(open - close, high - low)
+            buy_pressure = construct_max(open - close, high - low)
     elif close[-2] > open[-1]:
-        buy_pressure = max(high - open, close - low)
+        buy_pressure = construct_max(high - open, close - low)
     elif close[-2] < open[-1]:
-        buy_pressure = max(open - close, high - low)
+        buy_pressure = construct_max(open - close, high - low)
     else:
         buy_pressure = high - low
 
     if close[-1] < open[-1]:
         if close[-2] > open[-1]:
-            sell_pressure = max(close - open, high - low)
+            sell_pressure = construct_max(close - open, high - low)
         else:
             sell_pressure = high - low
     elif close[-1] > open[-1]:
         if close[-2] > open[-1]:
-            sell_pressure = max(close - low, high - close)
+            sell_pressure = construct_max(close - low, high - close)
         else:
-            sell_pressure = max(open - low, high - close)
+            sell_pressure = construct_max(open - low, high - close)
     elif high[-1] - close[-1] > close[-1] - low[-1]:
         if close[-2] > open[-1]:
-            sell_pressure = max(close - open, high - low)
+            sell_pressure = construct_max(close - open, high - low)
         else:
             sell_pressure = high - low
     elif high[-1] - close[-1] < close[-1] - low[-1]:
         if close[-2] > open[-1]:
-            sell_pressure = max(close - open, high - low)
+            sell_pressure = construct_max(close - open, high - low)
         else:
             sell_pressure = open - low
     elif close[-2] > open[-1]:
-        sell_pressure = max(close - open, high - low)
+        sell_pressure = construct_max(close - open, high - low)
     elif close[-2] < open[-1]:
-        sell_pressure = max(open - low, high - close)
+        sell_pressure = construct_max(open - low, high - close)
     else:
         sell_pressure = high - low
 

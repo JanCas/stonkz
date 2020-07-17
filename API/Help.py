@@ -18,6 +18,7 @@ def import_sklearn_module(sklearn_module):
 
     return getattr(import_module(import_string), model_name)
 
+# TODO does not work
 def construct_max(s1, s2):
     import pandas as pd
     assert(len(s1) == len(s2))
@@ -28,3 +29,9 @@ def construct_max(s1, s2):
 
     series = pd.Series(max_list)
     return series
+
+def initialize_alpaca():
+    from stonkz.settings import ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL
+    import alpaca_trade_api as trade
+
+    return trade.REST(ALPACA_API_KEY, ALPACA_API_SECRET, ALPACA_API_BASE_URL, api_version='v2')
